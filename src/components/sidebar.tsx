@@ -13,6 +13,7 @@ import UserSettings from "./user-settings";
 import { useLocalStorageData } from "@/app/hooks/useLocalStorageData";
 import { ScrollArea, Scrollbar } from "@radix-ui/react-scroll-area";
 import PullModel from "./pull-model";
+import { useSession, signOut } from "next-auth/react";
 import {
   Dialog,
   DialogContent,
@@ -28,6 +29,7 @@ import {
 } from "./ui/dropdown-menu";
 import { TrashIcon } from "@radix-ui/react-icons";
 import { useRouter } from "next/navigation";
+import UserLogin from "./user-login";
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -45,7 +47,7 @@ export function Sidebar({
   isMobile,
   chatId,
   setMessages,
-  closeSidebar
+  closeSidebar,
 }: SidebarProps) {
   const [localChats, setLocalChats] = useState<
     { chatId: string; messages: Message[] }[]
@@ -54,6 +56,7 @@ export function Sidebar({
   const [selectedChatId, setSselectedChatId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+  const { data: session } = useSession();
 
   useEffect(() => {
     if (chatId) {
@@ -109,9 +112,9 @@ export function Sidebar({
   return (
     <div
       data-collapsed={isCollapsed}
-      className="relative justify-between group lg:bg-accent/20 lg:dark:bg-card/35 flex flex-col h-full gap-4 p-2 data-[collapsed=true]:p-2 "
-    >
+      className="relative justify-between group lg:bg-accent/20 lg:dark:bg-card/35 flex flex-col h-full gap-4 p-2 data-[collapsed=true]:p-2 ">
       <div className=" flex flex-col justify-between p-2 max-h-fit overflow-y-auto">
+        {!session?.expires && <UserLogin />}
         <Button
           onClick={() => {
             router.push("/");
@@ -122,8 +125,7 @@ export function Sidebar({
             }
           }}
           variant="ghost"
-          className="flex justify-between w-full h-14 text-sm xl:text-lg font-normal items-center "
-        >
+          className="flex justify-between w-full h-14 text-sm xl:text-lg font-normal items-center ">
           <div className="flex gap-3 items-center ">
             {!isCollapsed && !isMobile && (
               <Image
@@ -155,8 +157,7 @@ export function Sidebar({
                         chatId.substring(5) !== selectedChatId,
                     },
                     "flex justify-between w-full h-14 text-base font-normal items-center "
-                  )}
-                >
+                  )}>
                   <div className="flex gap-3 items-center truncate">
                     <div className="flex flex-col">
                       <span className="text-xs font-normal ">
@@ -169,8 +170,7 @@ export function Sidebar({
                       <Button
                         variant="ghost"
                         className="flex justify-end items-center"
-                        onClick={(e) => e.stopPropagation()}
-                      >
+                        onClick={(e) => e.stopPropagation()}>
                         <MoreHorizontal size={15} className="shrink-0" />
                       </Button>
                     </DropdownMenuTrigger>
@@ -180,8 +180,7 @@ export function Sidebar({
                           <Button
                             variant="ghost"
                             className="w-full flex gap-2 hover:text-red-500 text-red-500 justify-start items-center"
-                            onClick={(e) => e.stopPropagation()}
-                          >
+                            onClick={(e) => e.stopPropagation()}>
                             <Trash2 className="shrink-0 w-4 h-4" />
                             Delete chat
                           </Button>
@@ -197,8 +196,7 @@ export function Sidebar({
                               <Button variant="outline">Cancel</Button>
                               <Button
                                 variant="destructive"
-                                onClick={() => handleDeleteChat(chatId)}
-                              >
+                                onClick={() => handleDeleteChat(chatId)}>
                                 Delete
                               </Button>
                             </div>

@@ -7,12 +7,42 @@ import { cn } from "@/lib/utils";
 import { Button, buttonVariants } from "../ui/button";
 import TextareaAutosize from "react-textarea-autosize";
 import { motion, AnimatePresence } from "framer-motion";
-import { Cross2Icon, ImageIcon, PaperPlaneIcon, StopIcon } from "@radix-ui/react-icons";
+import {
+  Cross2Icon,
+  ImageIcon,
+  PaperPlaneIcon,
+  StopIcon,
+} from "@radix-ui/react-icons";
 import { Mic, SendHorizonal } from "lucide-react";
 import useSpeechToText from "@/app/hooks/useSpeechRecognition";
 import MultiImagePicker from "../image-embedder";
+import MultiFilePicker from "../file-embedder";
 import useChatStore from "@/app/hooks/useChatStore";
+import { FileItem } from "@/app/hooks/useChatStore";
 import Image from "next/image";
+import {
+  FileImage,
+  FileText,
+  FileAudio,
+  FileVideo,
+  FileArchive,
+  FileCode,
+} from "lucide-react";
+import PDF from "/public/PDF.svg";
+import DOC from "/public/DOC.svg";
+import TXT from "/public/TXT.svg";
+
+// 根据文件类型选择图标
+const fileTypeIcons = (type: string) => {
+  if (type?.includes("doc"))
+    return <Image src={DOC} width={30} height={30} alt={type} />;
+  if (type?.includes("text"))
+    return <Image src={TXT} width={30} height={30} alt={type} />;
+  if (type?.includes("pdf"))
+    return <Image src={PDF} width={30} height={30} alt={type} />;
+
+  return <FileCode className="w-5 h-5" />;
+};
 
 export default function ChatBottombar({
   messages,
@@ -30,8 +60,23 @@ export default function ChatBottombar({
   const inputRef = React.useRef<HTMLTextAreaElement>(null);
   const base64Images = useChatStore((state) => state.base64Images);
   const setBase64Images = useChatStore((state) => state.setBase64Images);
+  const files = useChatStore((state) => state.files);
+  const setFiles = useChatStore((state) => state.setFiles);
   const env = process.env.NODE_ENV;
+  const [selectedFiles, setSelectedFiles] = React.useState<string[]>([]);
+  const [isUploading, setIsUploading] = React.useState(false);
 
+  const handleFilesPick = (files: File[]) => {
+    const formatFiles = files.map((file) => {
+      const fileTypeMatch = file.type.match(/\/(.+)/);
+      const fileType = fileTypeMatch ? fileTypeMatch[1] : file.type; // 获取 subtype 或保留原类型
+      return {
+        fileName: file.name,
+        fileType,
+      };
+    });
+    setFiles(formatFiles);
+  };
   React.useEffect(() => {
     const checkScreenWidth = () => {
       setIsMobile(window.innerWidth <= 768);
@@ -88,15 +133,23 @@ export default function ChatBottombar({
     <div className="p-4 pb-7 flex justify-between w-full items-center gap-2">
       <AnimatePresence initial={false}>
         <div className="w-full items-center flex relative gap-2">
-           <div className="flex flex-col relative w-full bg-accent dark:bg-card rounded-lg">
+          <div className="flex flex-col relative w-full bg-accent dark:bg-card rounded-lg">
             <div className="flex w-full">
               <form
                 onSubmit={handleSubmit}
-                className="w-full items-center flex relative gap-2"
-              >
+                className="w-full items-center flex relative gap-2">
                 <div className="absolute flex left-3 z-10">
-                <MultiImagePicker disabled={env === 'production'} onImagesPick={setBase64Images} />
+                  {/* <MultiImagePicker
+                    disabled={env === "production"}
+                    onImagesPick={setBase64Images}
+                  /> */}
+                  <MultiFilePicker
+                    onFilesPick={handleFilesPick}
+                    disabled={isUploading}
+                  />
                 </div>
+                {/* {message} */}
+
                 <TextareaAutosize
                   autoComplete="off"
                   value={
@@ -122,8 +175,7 @@ export default function ChatBottombar({
                           size="icon"
                           type="button"
                           onClick={handleListenClick}
-                          disabled={isLoading}
-                        >
+                          disabled={isLoading}>
                           <Mic className="w-5 h-5 " />
                           <span className="animate-pulse absolute h-[120%] w-[120%] rounded-full bg-blue-500/30" />
                         </Button>
@@ -135,8 +187,7 @@ export default function ChatBottombar({
                         size="icon"
                         type="button"
                         onClick={handleListenClick}
-                        disabled={isLoading}
-                      >
+                        disabled={isLoading}>
                         <Mic className="w-5 h-5 " />
                       </Button>
                     )}
@@ -145,8 +196,7 @@ export default function ChatBottombar({
                       variant="ghost"
                       size="icon"
                       type="submit"
-                      disabled={isLoading || !input.trim() || isListening}
-                    >
+                      disabled={isLoading || !input.trim() || isListening}>
                       <SendHorizonal className="w-5 h-5 " />
                     </Button>
                   </div>
@@ -157,8 +207,7 @@ export default function ChatBottombar({
                       variant="ghost"
                       size="icon"
                       type="button"
-                      disabled={true}
-                    >
+                      disabled={true}>
                       <Mic className="w-5 h-5 " />
                     </Button>
                     <Button
@@ -169,35 +218,72 @@ export default function ChatBottombar({
                       onClick={(e) => {
                         e.preventDefault();
                         stop();
-                      }}
-                    >
+                      }}>
                       <StopIcon className="w-5 h-5  " />
                     </Button>
                   </div>
                 )}
-
               </form>
             </div>
-            {base64Images && (
+            {/* {base64Images && (
               <div className="flex px-2 pb-2 gap-2 ">
                 {base64Images.map((image, index) => {
                   return (
-                    <div key={index} className="relative bg-muted-foreground/20 flex w-fit flex-col gap-2 p-1 border-t border-x rounded-md">
+                    <div
+                      key={index}
+                      className="relative bg-muted-foreground/20 flex w-fit flex-col gap-2 p-1 border-t border-x rounded-md">
                       <div className="flex text-sm">
-                        <Image src={image} width={20}
+                        <Image
+                          src={image}
+                          width={20}
                           height={20}
-                          className="h-auto rounded-md w-auto max-w-[100px] max-h-[100px]" alt={""} />
+                          className="h-auto rounded-md w-auto max-w-[100px] max-h-[100px]"
+                          alt={""}
+                        />
                       </div>
                       <Button
                         onClick={() => {
-                          const updatedImages = (prevImages: string[]) => prevImages.filter((_, i) => i !== index);
+                          const updatedImages = (prevImages: string[]) =>
+                            prevImages.filter((_, i) => i !== index);
                           setBase64Images(updatedImages(base64Images));
                         }}
-                        size='icon' className="absolute -top-1.5 -right-1.5 text-white cursor-pointer  bg-red-500 hover:bg-red-600 w-4 h-4 rounded-full flex items-center justify-center">
+                        size="icon"
+                        className="absolute -top-1.5 -right-1.5 text-white cursor-pointer  bg-red-500 hover:bg-red-600 w-4 h-4 rounded-full flex items-center justify-center">
                         <Cross2Icon className="w-3 h-3" />
                       </Button>
                     </div>
-                  )
+                  );
+                })}
+              </div>
+            )} */}
+            {files && (
+              <div className="flex px-2 pb-2 gap-2 ">
+                {files.map((file, index) => {
+                  return (
+                    <div
+                      key={index}
+                      className="relative bg-muted-foreground/20 flex w-fit flex-col gap-2 py-2 px-3 border-t border-x rounded-sm">
+                      <div className="flex text-sm items-center gap-2">
+                        {fileTypeIcons(file.fileType)}
+                        <div>
+                          <p>{file.fileName}</p>
+                          <p className="text-muted-foreground">
+                            {file.fileType}
+                          </p>
+                        </div>
+                      </div>
+                      <Button
+                        onClick={() => {
+                          const updatedImages = (files: FileItem[]) =>
+                            files.filter((_, i) => i !== index);
+                          setFiles(updatedImages(files));
+                        }}
+                        size="icon"
+                        className="absolute -top-1.5 -right-1.5 text-white cursor-pointer  bg-red-500 hover:bg-red-600 w-4 h-4 rounded-full flex items-center justify-center">
+                        <Cross2Icon className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  );
                 })}
               </div>
             )}

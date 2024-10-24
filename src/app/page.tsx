@@ -150,11 +150,11 @@ export default function Home() {
     setMessages([...messages]);
 
     const attachments: Attachment[] = base64Images
-    ? base64Images.map((image) => ({
-        contentType: 'image/base64', // Content type for base64 images
-        url: image, // The base64 image data
-      }))
-    : [];
+      ? base64Images.map((image) => ({
+          contentType: "image/base64", // Content type for base64 images
+          url: image, // The base64 image data
+        }))
+      : [];
 
     // Prepare the options object with additional body data, to pass the model.
     const requestOptions: ChatRequestOptions = {
@@ -167,53 +167,52 @@ export default function Home() {
         data: {
           images: base64Images,
         },
-        experimental_attachments: attachments
+        experimental_attachments: attachments,
       }),
     };
 
-    messages.slice(0, -1)
-    
+    messages.slice(0, -1);
 
     if (env === "production") {
       handleSubmitProduction(e);
-      setBase64Images(null)
+      setBase64Images(null);
     } else {
       // Call the handleSubmit function with the options
       handleSubmit(e, requestOptions);
-      setBase64Images(null)
+      setBase64Images(null);
     }
   };
 
-  const onOpenChange = (isOpen: boolean) => { 
-    const username = localStorage.getItem("ollama_user")
-    if (username) return setOpen(isOpen)
+  const onOpenChange = (isOpen: boolean) => {
+    const username = localStorage.getItem("ollama_user");
+    if (username) return setOpen(isOpen);
 
-    localStorage.setItem("ollama_user", "Anonymous")
-    window.dispatchEvent(new Event("storage"))
-    setOpen(isOpen)
-  }
-  
+    localStorage.setItem("ollama_user", "Anonymous");
+    window.dispatchEvent(new Event("storage"));
+    setOpen(isOpen);
+  };
+
   return (
     <main className="flex h-[calc(100dvh)] flex-col items-center ">
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <ChatLayout
-          chatId=""
-          setSelectedModel={setSelectedModel}
-          messages={messages}
-          input={input}
-          handleInputChange={handleInputChange}
-          handleSubmit={onSubmit}
-          isLoading={isLoading}
-          loadingSubmit={loadingSubmit}
-          error={error}
-          stop={stop}
-          navCollapsedSize={10}
-          defaultLayout={[30, 160]}
-          formRef={formRef}
-          setMessages={setMessages}
-          setInput={setInput}
-        />
-        <DialogContent className="flex flex-col space-y-4">
+      {/* <Dialog open={open} onOpenChange={onOpenChange}> */}
+      <ChatLayout
+        chatId=""
+        setSelectedModel={setSelectedModel}
+        messages={messages}
+        input={input}
+        handleInputChange={handleInputChange}
+        handleSubmit={onSubmit}
+        isLoading={isLoading}
+        loadingSubmit={loadingSubmit}
+        error={error}
+        stop={stop}
+        navCollapsedSize={10}
+        defaultLayout={[30, 160]}
+        formRef={formRef}
+        setMessages={setMessages}
+        setInput={setInput}
+      />
+      {/* <DialogContent className="flex flex-col space-y-4">
           <DialogHeader className="space-y-2">
             <DialogTitle>Welcome to Ollama!</DialogTitle>
             <DialogDescription>
@@ -223,7 +222,7 @@ export default function Home() {
             <UsernameForm setOpen={setOpen} />
           </DialogHeader>
         </DialogContent>
-      </Dialog>
+      </Dialog> */}
     </main>
   );
 }
