@@ -10,6 +10,6 @@ export async function getFileContent(file: File) {
   });
   const docs = await loader.load();
   return {
-    markdown: marked(docs[0].pageContent),
+    markdown: docs[0].pageContent,
   };
 }

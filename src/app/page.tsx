@@ -166,18 +166,19 @@ export default function Home() {
           selectedModel: selectedModel,
         },
       },
-      // ...(base64Images && {
-      //   data: {
-      //     images: base64Images,
-      //   },
-      //   experimental_attachments: image_attachments,
-      // }),
-      ...(attachments && {
+      ...(base64Images && {
         data: {
-          markdown: attachments[0].content,
+          images: base64Images,
         },
-        experimental_attachments: [attachments[0]],
+        experimental_attachments: image_attachments,
       }),
+      ...(attachments &&
+        attachments.length > 0 && {
+          data: {
+            markdown: attachments[0].content,
+          },
+          experimental_attachments: [attachments[0]],
+        }),
     };
 
     messages.slice(0, -1);

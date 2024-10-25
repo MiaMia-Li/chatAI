@@ -116,8 +116,8 @@ export default function ChatBottombar({
           } => file !== undefined
         );
 
-        // setFileList((current) => [...current, ...validAttachments]);
         setAttachments((current) => [...(current || []), ...validAttachments]);
+        // setInput && setInput(validAttachments[0].content || "");
       } catch (error) {
         console.error("Error uploading files:", error);
       } finally {
@@ -227,8 +227,7 @@ export default function ChatBottombar({
                       variant="ghost"
                       size="icon"
                       type="submit"
-                      // disabled={isLoading || !input.trim() || isListening}
-                    >
+                      disabled={isLoading || !input.trim() || isListening}>
                       <SendHorizonal className="w-5 h-5 " />
                     </Button>
                   </div>

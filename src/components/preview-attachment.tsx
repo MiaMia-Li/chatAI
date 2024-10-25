@@ -20,11 +20,11 @@ const PreviewAttachment = ({
   attachment,
   isUploading = false,
   onDelete,
-  hiddenDelete = false,
+  isPreview = false,
 }: {
   attachment: Attachment;
   isUploading?: boolean;
-  hiddenDelete?: boolean;
+  isPreview?: boolean;
   onDelete?: () => void;
 }) => {
   const fileTypeIcons = (type: string | undefined) => {
@@ -39,6 +39,23 @@ const PreviewAttachment = ({
   };
   const { name, url, contentType } = attachment;
 
+  if (isPreview) {
+    return (
+      <div className="flex text-sm items-center gap-2">
+        {isUploading ? (
+          <LoaderCircle className="animate-spin" />
+        ) : (
+          <Image src={PDF} width={30} height={30} alt={contentType || ""} />
+        )}
+        <div>
+          <p>{name}</p>
+          {/* <p className="text-muted-foreground">
+            {formatContentType(contentType)}
+          </p> */}
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="relative bg-muted-foreground/20 flex w-fit flex-col gap-2 py-2 px-3 border-t border-x rounded-sm">
       <div className="flex text-sm items-center gap-2">
@@ -49,10 +66,12 @@ const PreviewAttachment = ({
         )}
         <div>
           <p>{name}</p>
-          <p className="text-muted-foreground">{contentType}</p>
+          {/* <p className="text-muted-foreground">
+            {formatContentType(contentType)}
+          </p> */}
         </div>
       </div>
-      {!isUploading && !hiddenDelete && (
+      {!isUploading && (
         <Button
           onClick={onDelete}
           size="icon"

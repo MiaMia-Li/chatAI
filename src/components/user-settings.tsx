@@ -29,11 +29,13 @@ import UsernameForm from "./username-form";
 import EditUsernameForm from "./edit-username-form";
 import PullModel from "./pull-model";
 import { useSession, signOut } from "next-auth/react";
+import useUserStore from "@/app/hooks/useUserStore";
 
-interface UserInfo {
-  name?: string | undefined;
+interface User {
+  id: string | undefined;
+  name: string | undefined;
   email?: string | undefined;
-  image?: string | undefined;
+  image: string | undefined;
 }
 
 export default function UserSettings() {
@@ -41,7 +43,10 @@ export default function UserSettings() {
   const [isLoading, setIsLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const { data: session } = useSession();
-  const [userInfo, setUserInfo] = useState<UserInfo>();
+  const user = useUserStore((state) => state.user);
+  const setUser = useUserStore((state) => state.setUser);
+  // const [userInfo, setUserInfo] = useState<UserInfo>();
+  // consnt user
 
   useEffect(() => {
     // const handleStorageChange = () => {
@@ -53,13 +58,13 @@ export default function UserSettings() {
     // };
     const fetchData = () => {
       if (session?.user) {
-        setUserInfo({
+        setUser({
           name: session.user.name ?? undefined,
           email: session.user.email ?? undefined,
           image: session.user.image ?? undefined,
-        });
+        } as User);
       } else {
-        setUserInfo(undefined);
+        setUser(null);
       }
       setIsLoading(false);
     };
@@ -87,22 +92,21 @@ export default function UserSettings() {
           className="flex justify-start gap-3 w-full h-14 text-base font-normal items-center ">
           <Avatar className="flex justify-start items-center overflow-hidden">
             <AvatarImage
-              src={userInfo?.image}
+              src={user?.image}
               alt="AI"
               width={4}
               height={4}
               className="object-contain"
             />
             <AvatarFallback>
-              {session?.user?.name &&
-                session?.user?.name.substring(0, 2).toUpperCase()}
+              {user?.name && user?.name.substring(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>
           <div className="text-xs truncate">
             {isLoading ? (
               <Skeleton className="w-20 h-4" />
             ) : (
-              userInfo?.name || "Anonymous"
+              user?.name || "Anonymous"
             )}
           </div>
         </Button>

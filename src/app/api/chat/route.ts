@@ -19,7 +19,7 @@ export async function POST(request: Request) {
     data,
   }: { id: string; messages: Array<Message>; data: any } = await request.json();
 
-  console.log("message", data?.markdown);
+  console.log("markdown----", data?.markdown);
 
   // const session = await auth();
 
@@ -31,7 +31,6 @@ export async function POST(request: Request) {
   const updatedMessages = coreMessages.map((msg, index) =>
     index === 0 ? { ...msg, content: msg.content + data?.markdown || "" } : msg
   );
-  console.log("--coreMessages", coreMessages, updatedMessages);
 
   const result = await streamText({
     model: openai("gpt-4o-mini"),

@@ -34,7 +34,7 @@ export default function ChatTopbar({
   isLoading,
   chatId,
   messages,
-  setMessages
+  setMessages,
 }: ChatTopbarProps) {
   const [models, setModels] = React.useState<string[]>([]);
   const [open, setOpen] = React.useState(false);
@@ -48,32 +48,33 @@ export default function ChatTopbar({
 
     const fetchModels = async () => {
       if (env === "production") {
-        const fetchedModels = await fetch(process.env.NEXT_PUBLIC_OLLAMA_URL + "/api/tags");
+        const fetchedModels = await fetch(
+          process.env.NEXT_PUBLIC_OLLAMA_URL + "/api/tags"
+        );
         const json = await fetchedModels.json();
-        const apiModels = json.models.map((model : any) => model.name);
+        const apiModels = json.models.map((model: any) => model.name);
         setModels([...apiModels]);
-      } 
-      else {
-        const fetchedModels = await fetch("/api/tags") 
+      } else {
+        const fetchedModels = await fetch("/api/tags");
         const json = await fetchedModels.json();
-        const apiModels = json.models.map((model : any) => model.name);
+        const apiModels = json.models.map((model: any) => model.name);
         setModels([...apiModels]);
-    }
-    }
+      }
+    };
     fetchModels();
   }, []);
 
   const handleModelChange = (model: string) => {
     setCurrentModel(model);
     setSelectedModel(model);
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       localStorage.setItem("selectedModel", model);
     }
     setOpen(false);
   };
 
   const handleCloseSidebar = () => {
-    setSheetOpen(false);  // Close the sidebar
+    setSheetOpen(false); // Close the sidebar
   };
 
   return (
@@ -89,12 +90,12 @@ export default function ChatTopbar({
             isMobile={false}
             messages={messages}
             setMessages={setMessages}
-            closeSidebar={handleCloseSidebar} 
+            closeSidebar={handleCloseSidebar}
           />
         </SheetContent>
       </Sheet>
 
-      <Popover open={open} onOpenChange={setOpen}>
+      {/* <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
             disabled={isLoading}
@@ -127,7 +128,7 @@ export default function ChatTopbar({
             </Button>
           )}
         </PopoverContent>
-      </Popover>
+      </Popover> */}
     </div>
   );
 }

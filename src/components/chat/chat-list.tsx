@@ -11,6 +11,7 @@ import remarkGfm from "remark-gfm";
 import { INITIAL_QUESTIONS } from "@/utils/initial-questions";
 import { Button } from "../ui/button";
 import PreviewAttachment from "../preview-attachment";
+import useUserStore from "@/app/hooks/useUserStore";
 
 export default function ChatList({
   messages,
@@ -29,6 +30,7 @@ export default function ChatList({
   const [localStorageIsLoading, setLocalStorageIsLoading] =
     React.useState(true);
   const [initialQuestions, setInitialQuestions] = React.useState<Message[]>([]);
+  const user = useUserStore((state) => state.user);
 
   const scrollToBottom = () => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
@@ -167,45 +169,45 @@ export default function ChatList({
                 <div className="flex items-end gap-3">
                   <div className="flex flex-col gap-2 bg-accent p-3 rounded-md max-w-xs sm:max-w-2xl overflow-x-auto">
                     <div className="flex gap-2">
-                      {message.experimental_attachments
-                        ?.filter((attachment) =>
-                          attachment.contentType?.startsWith("image/")
-                        )
-                        .map((attachment, index) => (
-                          <Image
-                            key={`${message.id}-${index}`}
-                            src={attachment.url}
-                            width={200}
-                            height={200}
-                            alt="attached image"
-                            className="rounded-md object-contain"
-                          />
-                        ))}
+                      {message.experimental_attachments?.map(
+                        (attachment, index) => {
+                          if (attachment.contentType?.startsWith("image/")) {
+                            return (
+                              <Image
+                                key={`${message.id}-${index}`}
+                                src={attachment.url}
+                                width={200}
+                                height={200}
+                                alt="attached image"
+                                className="rounded-md object-contain"
+                              />
+                            );
+                          } else {
+                            return (
+                              <div key={index}>
+                                <PreviewAttachment
+                                  key={attachment.url}
+                                  attachment={attachment}
+                                  isPreview
+                                />
+                              </div>
+                            );
+                          }
+                        }
+                      )}
                     </div>
                     <p className="text-end">{message.content}</p>
-                    {message.experimental_attachments &&
-                      message.experimental_attachments.map(
-                        (attachment, index) => (
-                          <div key={index}>
-                            <PreviewAttachment
-                              key={attachment.url}
-                              attachment={attachment}
-                              hiddenDelete
-                            />
-                          </div>
-                        )
-                      )}
                   </div>
                   <Avatar className="flex justify-start items-center overflow-hidden">
                     <AvatarImage
-                      src="/"
+                      src={user?.image}
                       alt="user"
                       width={6}
                       height={6}
                       className="object-contain"
                     />
                     <AvatarFallback>
-                      {name && name.substring(0, 2).toUpperCase()}
+                      {user?.name && user?.name.substring(0, 2).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                 </div>
