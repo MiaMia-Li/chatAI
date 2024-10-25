@@ -6,22 +6,22 @@ export interface FileItem {
   fileName: string;
 }
 interface State {
-  files: FileItem[] | null;
+  attachments: any | null;
   base64Images: string[] | null;
   messages: CoreMessage[];
 }
 
 interface Actions {
   setBase64Images: (base64Images: string[] | null) => void;
-  setFiles: (files: FileItem[] | null) => void;
+  setAttachments: (files: any | null) => void;
   setMessages: (fn: (messages: CoreMessage[]) => CoreMessage[]) => void;
 }
 
 const useChatStore = create<State & Actions>()((set) => ({
-  files: null,
+  attachments: [],
   base64Images: null,
   setBase64Images: (base64Images) => set({ base64Images }),
-  setFiles: (files) => set({ files }),
+  setAttachments: (attachments) => set({ attachments }),
   messages: [],
   setMessages: (fn) => set((state) => ({ messages: fn(state.messages) })),
 }));

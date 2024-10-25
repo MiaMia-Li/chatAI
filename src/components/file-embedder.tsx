@@ -23,7 +23,9 @@ const MultiFilePicker: React.FC<MultiFilePickerProps> = ({
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    accept: {}, // No restrictions, accept all file types
+    accept: {
+      "application/pdf": [".pdf"],
+    }, // No restrictions, accept all file types
     multiple: true, // Allow multiple file selection
     maxSize: 10485760, // 10 MB per file
   });

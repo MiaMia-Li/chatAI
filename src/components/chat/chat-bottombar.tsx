@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useCallback } from "react";
 import { ChatProps } from "./chat";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -16,33 +16,11 @@ import {
 import { Mic, SendHorizonal } from "lucide-react";
 import useSpeechToText from "@/app/hooks/useSpeechRecognition";
 import MultiImagePicker from "../image-embedder";
-import MultiFilePicker from "../file-embedder";
 import useChatStore from "@/app/hooks/useChatStore";
-import { FileItem } from "@/app/hooks/useChatStore";
 import Image from "next/image";
-import {
-  FileImage,
-  FileText,
-  FileAudio,
-  FileVideo,
-  FileArchive,
-  FileCode,
-} from "lucide-react";
-import PDF from "/public/PDF.svg";
-import DOC from "/public/DOC.svg";
-import TXT from "/public/TXT.svg";
-
-// 根据文件类型选择图标
-const fileTypeIcons = (type: string) => {
-  if (type?.includes("doc"))
-    return <Image src={DOC} width={30} height={30} alt={type} />;
-  if (type?.includes("text"))
-    return <Image src={TXT} width={30} height={30} alt={type} />;
-  if (type?.includes("pdf"))
-    return <Image src={PDF} width={30} height={30} alt={type} />;
-
-  return <FileCode className="w-5 h-5" />;
-};
+import MultiFilePicker from "../file-embedder";
+import { toast } from "sonner";
+import PreviewAttachment from "../preview-attachment";
 
 export default function ChatBottombar({
   messages,
@@ -60,23 +38,12 @@ export default function ChatBottombar({
   const inputRef = React.useRef<HTMLTextAreaElement>(null);
   const base64Images = useChatStore((state) => state.base64Images);
   const setBase64Images = useChatStore((state) => state.setBase64Images);
-  const files = useChatStore((state) => state.files);
-  const setFiles = useChatStore((state) => state.setFiles);
   const env = process.env.NODE_ENV;
-  const [selectedFiles, setSelectedFiles] = React.useState<string[]>([]);
-  const [isUploading, setIsUploading] = React.useState(false);
+  const [uploadQueue, setUploadQueue] = React.useState<string[]>([]);
+  const [attachments, setAttachments] = React.useState<
+    { url: string; name: string; contentType: string }[]
+  >([]);
 
-  const handleFilesPick = (files: File[]) => {
-    const formatFiles = files.map((file) => {
-      const fileTypeMatch = file.type.match(/\/(.+)/);
-      const fileType = fileTypeMatch ? fileTypeMatch[1] : file.type; // 获取 subtype 或保留原类型
-      return {
-        fileName: file.name,
-        fileType,
-      };
-    });
-    setFiles(formatFiles);
-  };
   React.useEffect(() => {
     const checkScreenWidth = () => {
       setIsMobile(window.innerWidth <= 768);
@@ -93,6 +60,62 @@ export default function ChatBottombar({
       window.removeEventListener("resize", checkScreenWidth);
     };
   }, []);
+
+  const uploadFile = useCallback(
+    async (
+      file: File
+    ): Promise<
+      { url: string; name: string; contentType: string } | undefined
+    > => {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      try {
+        const response = await fetch(`/api/files/upload`, {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(
+            errorData.error || "Server error during file upload."
+          );
+        }
+
+        const { url, pathname, contentType } = await response.json();
+        return { url, name: pathname, contentType };
+      } catch (error) {
+        console.error("File upload error:", error);
+        toast.error((error as Error).message || "Upload failed, try again.");
+        return undefined;
+      }
+    },
+    []
+  );
+
+  const handleFilesPick = useCallback(
+    async (files: File[]) => {
+      setUploadQueue(files.map((file) => file.name));
+      try {
+        const uploadPromises = files.map(uploadFile);
+        const uploadedFiles = await Promise.all(uploadPromises);
+
+        const validAttachments = uploadedFiles.filter(
+          (file): file is { url: string; name: string; contentType: string } =>
+            file !== undefined
+        );
+
+        setAttachments((current) => [...current, ...validAttachments]);
+      } catch (error) {
+        console.error("Error uploading files:", error);
+      } finally {
+        setUploadQueue([]);
+      }
+    },
+    [uploadFile]
+  );
+  console.log("-attachments", attachments);
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -139,17 +162,15 @@ export default function ChatBottombar({
                 onSubmit={handleSubmit}
                 className="w-full items-center flex relative gap-2">
                 <div className="absolute flex left-3 z-10">
-                  {/* <MultiImagePicker
+                  <MultiImagePicker
                     disabled={env === "production"}
                     onImagesPick={setBase64Images}
-                  /> */}
+                  />
                   <MultiFilePicker
+                    disabled={env === "production"}
                     onFilesPick={handleFilesPick}
-                    disabled={isUploading}
                   />
                 </div>
-                {/* {message} */}
-
                 <TextareaAutosize
                   autoComplete="off"
                   value={
@@ -162,7 +183,7 @@ export default function ChatBottombar({
                   placeholder={
                     !isListening ? "Enter your prompt here" : "Listening"
                   }
-                  className=" max-h-24 px-14 bg-accent py-[22px] rounded-lg  text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 w-full flex items-center h-16 resize-none overflow-hidden dark:bg-card"
+                  className=" max-h-24 pr-14 pl-24 bg-accent py-[22px] rounded-lg  text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 w-full flex items-center h-16 resize-none overflow-hidden dark:bg-card"
                 />
 
                 {!isLoading ? (
@@ -225,7 +246,7 @@ export default function ChatBottombar({
                 )}
               </form>
             </div>
-            {/* {base64Images && (
+            {base64Images && (
               <div className="flex px-2 pb-2 gap-2 ">
                 {base64Images.map((image, index) => {
                   return (
@@ -254,37 +275,35 @@ export default function ChatBottombar({
                     </div>
                   );
                 })}
-              </div>
-            )} */}
-            {files && (
-              <div className="flex px-2 pb-2 gap-2 ">
-                {files.map((file, index) => {
-                  return (
-                    <div
-                      key={index}
-                      className="relative bg-muted-foreground/20 flex w-fit flex-col gap-2 py-2 px-3 border-t border-x rounded-sm">
-                      <div className="flex text-sm items-center gap-2">
-                        {fileTypeIcons(file.fileType)}
-                        <div>
-                          <p>{file.fileName}</p>
-                          <p className="text-muted-foreground">
-                            {file.fileType}
-                          </p>
-                        </div>
+                {(attachments.length > 0 || uploadQueue.length > 0) && (
+                  <div className="flex flex-row gap-2">
+                    {attachments.map((attachment, index) => (
+                      <div key={index}>
+                        <PreviewAttachment
+                          key={attachment.url}
+                          attachment={attachment}
+                          onDelete={() => {
+                            const updatedImages = (attachments: any) =>
+                              attachments.filter((_, i) => i !== index);
+                            setAttachments(updatedImages(attachments));
+                          }}
+                        />
                       </div>
-                      <Button
-                        onClick={() => {
-                          const updatedImages = (files: FileItem[]) =>
-                            files.filter((_, i) => i !== index);
-                          setFiles(updatedImages(files));
+                    ))}
+
+                    {uploadQueue.map((filename) => (
+                      <PreviewAttachment
+                        key={filename}
+                        attachment={{
+                          url: "",
+                          name: filename,
+                          contentType: "",
                         }}
-                        size="icon"
-                        className="absolute -top-1.5 -right-1.5 text-white cursor-pointer  bg-red-500 hover:bg-red-600 w-4 h-4 rounded-full flex items-center justify-center">
-                        <Cross2Icon className="w-3 h-3" />
-                      </Button>
-                    </div>
-                  );
-                })}
+                        isUploading={true}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>
