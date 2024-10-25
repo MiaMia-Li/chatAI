@@ -16,13 +16,13 @@ export const metadata: Metadata = {
     title: "InsightfulCV - Your Career Development Partner",
     description:
       "Professional resume writing and career guidance services to help you achieve your career goals.",
-    images: [{ url: "/og-image.jpg" }],
+    images: [{ url: "/og-image.png" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "InsightfulCV - Professional Resume Writing & Career Guidance",
     description: "Clarify your career path and pave the way to success.",
-    images: ["/twitter-image.jpg"],
+    images: ["/twitter-image.png"],
   },
 };
 
