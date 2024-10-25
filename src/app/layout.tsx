@@ -8,8 +8,22 @@ import SessionWrapper from "@/components/SessionWrapper";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Ollama UI",
-  description: "Ollama chatbot web interface",
+  title: "InsightfulCV",
+  description:
+    "InsightfulCV offers professional resume writing, career guidance, and job search assistance to help you stand out in the competitive job market",
+  keywords: "resume writing, career coaching, job search assistance",
+  openGraph: {
+    title: "InsightfulCV - Your Career Development Partner",
+    description:
+      "Professional resume writing and career guidance services to help you achieve your career goals.",
+    images: [{ url: "/og-image.jpg" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "InsightfulCV - Professional Resume Writing & Career Guidance",
+    description: "Clarify your career path and pave the way to success.",
+    images: ["/twitter-image.jpg"],
+  },
 };
 
 export const viewport = {
@@ -27,6 +41,22 @@ export default function RootLayout({
   return (
     <SessionWrapper>
       <html lang="en">
+        <head>
+          <link
+            rel="icon"
+            type="image/png"
+            href="/favicon-48x48.png"
+            sizes="48x48"
+          />
+          <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+          <link rel="shortcut icon" href="/favicon.ico" />
+          <link
+            rel="apple-touch-icon"
+            sizes="180x180"
+            href="/apple-touch-icon.png"
+          />
+          <link rel="manifest" href="/site.webmanifest" />
+        </head>
         <body className={inter.className}>
           <ThemeProvider attribute="class" defaultTheme="dark">
             {children}
