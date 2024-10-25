@@ -56,6 +56,8 @@ export default function Home() {
   const formRef = useRef<HTMLFormElement>(null);
   const base64Images = useChatStore((state) => state.base64Images);
   const setBase64Images = useChatStore((state) => state.setBase64Images);
+  const attachments = useChatStore((state) => state.attachments);
+  const setAttachments = useChatStore((state) => state.setAttachments);
 
   useEffect(() => {
     if (messages.length < 1) {
@@ -90,6 +92,7 @@ export default function Home() {
   }, [selectedModel]);
 
   const addMessage = (Message: Message) => {
+    console.log("-addMessage-", Message);
     messages.push(Message);
     window.dispatchEvent(new Event("storage"));
     setMessages([...messages]);
@@ -149,7 +152,7 @@ export default function Home() {
 
     setMessages([...messages]);
 
-    const attachments: Attachment[] = base64Images
+    const image_attachments: Attachment[] = base64Images
       ? base64Images.map((image) => ({
           contentType: "image/base64", // Content type for base64 images
           url: image, // The base64 image data
@@ -163,11 +166,17 @@ export default function Home() {
           selectedModel: selectedModel,
         },
       },
-      ...(base64Images && {
+      // ...(base64Images && {
+      //   data: {
+      //     images: base64Images,
+      //   },
+      //   experimental_attachments: image_attachments,
+      // }),
+      ...(attachments && {
         data: {
-          images: base64Images,
+          markdown: attachments[0].content,
         },
-        experimental_attachments: attachments,
+        experimental_attachments: [attachments[0]],
       }),
     };
 
@@ -176,10 +185,12 @@ export default function Home() {
     if (env === "production") {
       handleSubmitProduction(e);
       setBase64Images(null);
+      setAttachments(null);
     } else {
       // Call the handleSubmit function with the options
       handleSubmit(e, requestOptions);
       setBase64Images(null);
+      setAttachments(null);
     }
   };
 

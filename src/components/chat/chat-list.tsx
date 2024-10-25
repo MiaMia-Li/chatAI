@@ -10,6 +10,7 @@ import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { INITIAL_QUESTIONS } from "@/utils/initial-questions";
 import { Button } from "../ui/button";
+import PreviewAttachment from "../preview-attachment";
 
 export default function ChatList({
   messages,
@@ -44,6 +45,8 @@ export default function ChatList({
       setLocalStorageIsLoading(false);
     }
   }, []);
+
+  console.log("---chatList", messages);
 
   useEffect(() => {
     // Fetch 4 initial questions
@@ -81,7 +84,7 @@ export default function ChatList({
     }, 1);
   };
 
-  messages.map((m) => console.log(m.experimental_attachments))
+  messages.map((m) => console.log(m.experimental_attachments));
 
   if (messages.length === 0) {
     return (
@@ -117,15 +120,13 @@ export default function ChatList({
                       scale: { duration: 0.1, delay },
                       y: { type: "spring", stiffness: 100, damping: 10, delay },
                     }}
-                    key={message.content}
-                  >
+                    key={message.content}>
                     <Button
                       key={message.content}
                       type="button"
                       variant="outline"
                       className="sm:text-start px-4 py-8 flex w-full justify-center sm:justify-start items-center text-sm whitespace-pre-wrap"
-                      onClick={(e) => onClickQuestion(message.content, e)}
-                    >
+                      onClick={(e) => onClickQuestion(message.content, e)}>
                       {message.content}
                     </Button>
                   </motion.div>
@@ -140,8 +141,7 @@ export default function ChatList({
   return (
     <div
       id="scroller"
-      className="w-full overflow-y-scroll overflow-x-hidden h-full justify-end"
-    >
+      className="w-full overflow-y-scroll overflow-x-hidden h-full justify-end">
       <div className="w-full flex flex-col overflow-x-hidden overflow-y-hidden min-h-full justify-end">
         {messages.map((message, index) => (
           <motion.div
@@ -161,24 +161,40 @@ export default function ChatList({
             className={cn(
               "flex flex-col gap-2 p-4 whitespace-pre-wrap",
               message.role === "user" ? "items-end" : "items-start"
-            )}
-          >
+            )}>
             <div className="flex gap-3 items-center">
               {message.role === "user" && (
                 <div className="flex items-end gap-3">
                   <div className="flex flex-col gap-2 bg-accent p-3 rounded-md max-w-xs sm:max-w-2xl overflow-x-auto">
                     <div className="flex gap-2">
-                    {message.experimental_attachments?.filter(attachment => attachment.contentType?.startsWith('image/'),).map((attachment, index) => (
-                      <Image
-                      key={`${message.id}-${index}`}
-                      src={attachment.url}
-                      width={200}
-                      height={200} alt='attached image'
-                      className="rounded-md object-contain"                
-                      />
-                    ))}
+                      {message.experimental_attachments
+                        ?.filter((attachment) =>
+                          attachment.contentType?.startsWith("image/")
+                        )
+                        .map((attachment, index) => (
+                          <Image
+                            key={`${message.id}-${index}`}
+                            src={attachment.url}
+                            width={200}
+                            height={200}
+                            alt="attached image"
+                            className="rounded-md object-contain"
+                          />
+                        ))}
                     </div>
                     <p className="text-end">{message.content}</p>
+                    {message.experimental_attachments &&
+                      message.experimental_attachments.map(
+                        (attachment, index) => (
+                          <div key={index}>
+                            <PreviewAttachment
+                              key={attachment.url}
+                              attachment={attachment}
+                              hiddenDelete
+                            />
+                          </div>
+                        )
+                      )}
                   </div>
                   <Avatar className="flex justify-start items-center overflow-hidden">
                     <AvatarImage

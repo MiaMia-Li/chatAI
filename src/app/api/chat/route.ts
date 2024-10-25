@@ -13,10 +13,13 @@ import { createOpenAI, openai } from "@ai-sdk/openai";
 // import { deleteChatById, getChatById, saveChat } from "@/db/queries";
 
 export async function POST(request: Request) {
-  const { id, messages }: { id: string; messages: Array<Message> } =
-    await request.json();
+  const {
+    id,
+    messages,
+    data,
+  }: { id: string; messages: Array<Message>; data: any } = await request.json();
 
-  console.log("message", messages);
+  console.log("message", data?.markdown);
 
   // const session = await auth();
 
@@ -25,12 +28,16 @@ export async function POST(request: Request) {
   // }
 
   const coreMessages = convertToCoreMessages(messages);
+  const updatedMessages = coreMessages.map((msg, index) =>
+    index === 0 ? { ...msg, content: msg.content + data?.markdown || "" } : msg
+  );
+  console.log("--coreMessages", coreMessages, updatedMessages);
 
   const result = await streamText({
     model: openai("gpt-4o-mini"),
     system:
       "you are a friendly assistant! keep your responses concise and helpful.",
-    messages: coreMessages,
+    messages: updatedMessages,
     maxSteps: 5,
     // tools: {
     //   getWeather: {

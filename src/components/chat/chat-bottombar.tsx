@@ -37,12 +37,14 @@ export default function ChatBottombar({
   const [isMobile, setIsMobile] = React.useState(false);
   const inputRef = React.useRef<HTMLTextAreaElement>(null);
   const base64Images = useChatStore((state) => state.base64Images);
+  const attachments = useChatStore((state) => state.attachments);
   const setBase64Images = useChatStore((state) => state.setBase64Images);
+  const setAttachments = useChatStore((state) => state.setAttachments);
   const env = process.env.NODE_ENV;
   const [uploadQueue, setUploadQueue] = React.useState<string[]>([]);
-  const [attachments, setAttachments] = React.useState<
-    { url: string; name: string; contentType: string }[]
-  >([]);
+  // const [fileList, setFileList] = React.useState<
+  //   { url: string; name: string; contentType: string }[]
+  // >([]);
 
   React.useEffect(() => {
     const checkScreenWidth = () => {
@@ -65,7 +67,8 @@ export default function ChatBottombar({
     async (
       file: File
     ): Promise<
-      { url: string; name: string; contentType: string } | undefined
+      | { url: string; name: string; contentType: string; content: string }
+      | undefined
     > => {
       const formData = new FormData();
       formData.append("file", file);
@@ -83,8 +86,9 @@ export default function ChatBottombar({
           );
         }
 
-        const { url, pathname, contentType } = await response.json();
-        return { url, name: pathname, contentType };
+        const { url, pathname, contentType, markdown } = await response.json();
+        // setInput(markdown || "");
+        return { url, name: pathname, contentType, content: markdown };
       } catch (error) {
         console.error("File upload error:", error);
         toast.error((error as Error).message || "Upload failed, try again.");
@@ -102,11 +106,18 @@ export default function ChatBottombar({
         const uploadedFiles = await Promise.all(uploadPromises);
 
         const validAttachments = uploadedFiles.filter(
-          (file): file is { url: string; name: string; contentType: string } =>
-            file !== undefined
+          (
+            file
+          ): file is {
+            url: string;
+            name: string;
+            contentType: string;
+            content: string;
+          } => file !== undefined
         );
 
-        setAttachments((current) => [...current, ...validAttachments]);
+        // setFileList((current) => [...current, ...validAttachments]);
+        setAttachments((current) => [...(current || []), ...validAttachments]);
       } catch (error) {
         console.error("Error uploading files:", error);
       } finally {
@@ -115,7 +126,6 @@ export default function ChatBottombar({
     },
     [uploadFile]
   );
-  console.log("-attachments", attachments);
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -217,7 +227,8 @@ export default function ChatBottombar({
                       variant="ghost"
                       size="icon"
                       type="submit"
-                      disabled={isLoading || !input.trim() || isListening}>
+                      // disabled={isLoading || !input.trim() || isListening}
+                    >
                       <SendHorizonal className="w-5 h-5 " />
                     </Button>
                   </div>
@@ -246,9 +257,10 @@ export default function ChatBottombar({
                 )}
               </form>
             </div>
-            {base64Images && (
-              <div className="flex px-2 pb-2 gap-2 ">
-                {base64Images.map((image, index) => {
+
+            <div className="flex px-2 pb-2 gap-2 ">
+              {base64Images &&
+                base64Images.map((image, index) => {
                   return (
                     <div
                       key={index}
@@ -275,9 +287,11 @@ export default function ChatBottombar({
                     </div>
                   );
                 })}
-                {(attachments.length > 0 || uploadQueue.length > 0) && (
-                  <div className="flex flex-row gap-2">
-                    {attachments.map((attachment, index) => (
+              {((attachments && attachments.length > 0) ||
+                uploadQueue.length > 0) && (
+                <div className="flex flex-row gap-2">
+                  {attachments &&
+                    attachments.map((attachment, index) => (
                       <div key={index}>
                         <PreviewAttachment
                           key={attachment.url}
@@ -291,21 +305,20 @@ export default function ChatBottombar({
                       </div>
                     ))}
 
-                    {uploadQueue.map((filename) => (
-                      <PreviewAttachment
-                        key={filename}
-                        attachment={{
-                          url: "",
-                          name: filename,
-                          contentType: "",
-                        }}
-                        isUploading={true}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
+                  {uploadQueue.map((filename) => (
+                    <PreviewAttachment
+                      key={filename}
+                      attachment={{
+                        url: "",
+                        name: filename,
+                        contentType: "",
+                      }}
+                      isUploading={true}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </AnimatePresence>

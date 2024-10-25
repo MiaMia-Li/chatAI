@@ -125,11 +125,11 @@ export default function Page({ params }: { params: { id: string } }) {
     setMessages([...messages]);
 
     const attachments: Attachment[] = base64Images
-    ? base64Images.map((image) => ({
-        contentType: 'image/base64', // Content type for base64 images
-        url: image, // The base64 image data
-      }))
-    : [];
+      ? base64Images.map((image) => ({
+          contentType: "image/base64", // Content type for base64 images
+          url: image, // The base64 image data
+        }))
+      : [];
 
     // Prepare the options object with additional body data, to pass the model.
     const requestOptions: ChatRequestOptions = {
@@ -142,18 +142,19 @@ export default function Page({ params }: { params: { id: string } }) {
         data: {
           images: base64Images,
         },
-        experimental_attachments: attachments
+        experimental_attachments: attachments,
       }),
     };
 
     if (env === "production" && selectedModel !== "REST API") {
       handleSubmitProduction(e);
-      setBase64Images(null)
+      setBase64Images(null);
     } else {
       // use the /api/chat route
       // Call the handleSubmit function with the options
+      console.log("---page--id", e);
       handleSubmit(e, requestOptions);
-      setBase64Images(null)
+      setBase64Images(null);
     }
   };
 

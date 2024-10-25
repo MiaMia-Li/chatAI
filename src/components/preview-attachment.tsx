@@ -20,9 +20,11 @@ const PreviewAttachment = ({
   attachment,
   isUploading = false,
   onDelete,
+  hiddenDelete = false,
 }: {
   attachment: Attachment;
   isUploading?: boolean;
+  hiddenDelete?: boolean;
   onDelete?: () => void;
 }) => {
   const fileTypeIcons = (type: string | undefined) => {
@@ -43,14 +45,14 @@ const PreviewAttachment = ({
         {isUploading ? (
           <LoaderCircle className="animate-spin" />
         ) : (
-          <>{fileTypeIcons(contentType)}</>
+          <Image src={PDF} width={30} height={30} alt={contentType || ""} />
         )}
         <div>
           <p>{name}</p>
           <p className="text-muted-foreground">{contentType}</p>
         </div>
       </div>
-      {!isUploading && (
+      {!isUploading && !hiddenDelete && (
         <Button
           onClick={onDelete}
           size="icon"

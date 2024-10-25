@@ -1,9 +1,7 @@
 import { put } from "@vercel/blob";
 import { NextResponse } from "next/server";
 import { z } from "zod";
-
-// import { auth } from "@/app/(auth)/auth";
-
+import { getFileContent } from "@/lib/parse";
 const FileSchema = z.object({
   file: z
     .instanceof(File)
@@ -38,6 +36,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
     }
 
+    // Get markdown content from the file
+    const { markdown } = await getFileContent(file);
+
     const validatedFile = FileSchema.safeParse({ file });
 
     if (!validatedFile.success) {
@@ -56,7 +57,11 @@ export async function POST(request: Request) {
         access: "public",
       });
 
-      return NextResponse.json(data);
+      // Include markdown content in the response
+      return NextResponse.json({
+        ...data,
+        markdown, // Add markdown content here
+      });
     } catch (error) {
       return NextResponse.json({ error: "Upload failed" }, { status: 500 });
     }
