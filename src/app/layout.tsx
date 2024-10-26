@@ -3,7 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/providers/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
-import SessionWrapper from "@/components/SessionWrapper";
+import SessionWrapper from "@/components/session-wrapper";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -58,7 +58,7 @@ export default function RootLayout({
           <link rel="manifest" href="/site.webmanifest" />
         </head>
         <body className={inter.className}>
-          <ThemeProvider attribute="class" defaultTheme="dark">
+          <ThemeProvider attribute="class">
             {children}
             <Toaster />
           </ThemeProvider>

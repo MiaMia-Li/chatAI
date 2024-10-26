@@ -102,13 +102,13 @@ export default function UserSettings() {
               {user?.name && user?.name.substring(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>
-          <div className="text-xs truncate">
+          {/* <div className="text-xs truncate">
             {isLoading ? (
               <Skeleton className="w-20 h-4" />
             ) : (
               user?.name || "Anonymous"
             )}
-          </div>
+          </div> */}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-48 p-2">
