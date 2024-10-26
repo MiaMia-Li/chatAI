@@ -69,8 +69,7 @@ export function ChatLayout({
           sizes
         )}`;
       }}
-      className="h-screen items-stretch"
-    >
+      className="h-screen items-stretch">
       <ResizablePanel
         defaultSize={defaultLayout[0]}
         collapsedSize={navCollapsedSize}
@@ -93,10 +92,9 @@ export function ChatLayout({
           isCollapsed
             ? "min-w-[50px] md:min-w-[70px] transition-all duration-300 ease-in-out"
             : "hidden md:block"
-        )}
-      >
+        )}>
         <Sidebar
-          isCollapsed={isCollapsed || isMobile}
+          isCollapsed={false}
           messages={messages}
           isMobile={isMobile}
           chatId={chatId}
@@ -106,8 +104,7 @@ export function ChatLayout({
       <ResizableHandle className={cn("hidden md:flex")} withHandle />
       <ResizablePanel
         className="h-full w-full flex justify-center"
-        defaultSize={defaultLayout[1]}
-      >
+        defaultSize={defaultLayout[1]}>
         <Chat
           chatId={chatId}
           setSelectedModel={setSelectedModel}

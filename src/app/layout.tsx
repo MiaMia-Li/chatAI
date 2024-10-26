@@ -8,19 +8,19 @@ import SessionWrapper from "@/components/session-wrapper";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "InsightfulCV",
+  title: "InsightCV",
   description:
-    "InsightfulCV offers professional resume writing, career guidance, and job search assistance to help you stand out in the competitive job market",
+    "InsightCV offers professional resume writing, career guidance, and job search assistance to help you stand out in the competitive job market",
   keywords: "resume writing, career coaching, job search assistance",
   openGraph: {
-    title: "InsightfulCV - Your Career Development Partner",
+    title: "InsightCV - Your Career Development Partner",
     description:
       "Professional resume writing and career guidance services to help you achieve your career goals.",
     images: [{ url: "/og-image.png" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "InsightfulCV - Professional Resume Writing & Career Guidance",
+    title: "InsightCV - Professional Resume Writing & Career Guidance",
     description: "Clarify your career path and pave the way to success.",
     images: ["/twitter-image.png"],
   },

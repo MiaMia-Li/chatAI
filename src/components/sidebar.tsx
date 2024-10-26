@@ -9,7 +9,6 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import SidebarSkeleton from "./sidebar-skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import UserSettings from "./user-settings";
 import { useLocalStorageData } from "@/app/hooks/useLocalStorageData";
 import { ScrollArea, Scrollbar } from "@radix-ui/react-scroll-area";
 import PullModel from "./pull-model";
@@ -29,7 +28,6 @@ import {
 } from "./ui/dropdown-menu";
 import { TrashIcon } from "@radix-ui/react-icons";
 import { useRouter } from "next/navigation";
-import UserLogin from "./user-login";
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -114,7 +112,6 @@ export function Sidebar({
       data-collapsed={isCollapsed}
       className="relative justify-between group lg:bg-accent/20 lg:dark:bg-card/35 flex flex-col h-full gap-4 p-2 data-[collapsed=true]:p-2 ">
       <div className=" flex flex-col justify-between p-2 max-h-fit overflow-y-auto">
-        {!session?.expires && <UserLogin />}
         <Button
           onClick={() => {
             router.push("/");
@@ -129,7 +126,7 @@ export function Sidebar({
           <div className="flex gap-3 items-center ">
             {!isCollapsed && !isMobile && (
               <Image
-                src="/ollama.png"
+                src="/Vector.png"
                 alt="AI"
                 width={28}
                 height={28}
@@ -211,10 +208,6 @@ export function Sidebar({
           )}
           {isLoading && <SidebarSkeleton />}
         </div>
-      </div>
-
-      <div className="justify-end px-2 py-2 w-full border-t">
-        <UserSettings />
       </div>
     </div>
   );

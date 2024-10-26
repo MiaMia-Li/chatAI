@@ -20,7 +20,8 @@ import { CaretSortIcon, HamburgerMenuIcon } from "@radix-ui/react-icons";
 import { Sidebar } from "../sidebar";
 import { Message } from "ai/react";
 import { getSelectedModel } from "@/lib/model-helper";
-import UserNav from "../user-nav";
+import UserMenu from "../user-menu";
+import { SiteLogo } from "../SiteLogo";
 
 interface ChatTopbarProps {
   setSelectedModel: React.Dispatch<React.SetStateAction<string>>;
@@ -95,7 +96,6 @@ export default function ChatTopbar({
           />
         </SheetContent>
       </Sheet>
-      <UserNav />
       {/* <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
@@ -130,6 +130,8 @@ export default function ChatTopbar({
           )}
         </PopoverContent>
       </Popover> */}
+      {/* <SiteLogo /> */}
+      <UserMenu />
     </div>
   );
 }
