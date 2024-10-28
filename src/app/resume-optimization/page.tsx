@@ -11,10 +11,10 @@ import { ClientMessage } from "../actions/resume-action";
 import { useActions, useUIState } from "ai/rsc";
 import { generateId } from "ai";
 import ResumeResult from "@/components/resume/resume-result";
-import useChatStore from "../hooks/useChatStore";
 import { toast } from "sonner";
 import PreviewAttachment from "@/components/preview-attachment";
 import { motion, AnimatePresence } from "framer-motion";
+import useChatStore from "../hooks/useChatStore";
 
 export default function ResumeAnalysis() {
   const [conversation, setConversation] = useUIState();
