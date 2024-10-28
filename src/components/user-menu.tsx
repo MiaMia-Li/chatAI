@@ -12,7 +12,12 @@ import UserLogin from "./user-login";
 
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { PlusCircledIcon, ExitIcon } from "@radix-ui/react-icons";
+import {
+  PlusCircledIcon,
+  ExitIcon,
+  GearIcon,
+  MixIcon,
+} from "@radix-ui/react-icons";
 import { useEffect, useState } from "react";
 
 import { useSession, signOut } from "next-auth/react";
@@ -79,14 +84,31 @@ export default function UserMenu() {
       <DropdownMenuContent className="w-48 p-2">
         <DropdownMenuLabel>{user?.name}</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
+        {/* <DropdownMenuItem>
           <Link
             className="flex w-full gap-2 items-center cursor-pointer"
             href="buy-credits">
             <PlusCircledIcon className="w-4 h-4" />
             Buy Credits
           </Link>
+        </DropdownMenuItem> */}
+        <DropdownMenuItem>
+          <Link
+            className="flex w-full gap-2 items-center cursor-pointer"
+            href="/dashboard">
+            <MixIcon className="w-4 h-4" />
+            Dashboard
+          </Link>
         </DropdownMenuItem>
+        <DropdownMenuItem>
+          <Link
+            className="flex w-full gap-2 items-center cursor-pointer"
+            href="/settings">
+            <GearIcon className="w-4 h-4" />
+            Settings
+          </Link>
+        </DropdownMenuItem>
+
         <DropdownMenuItem onSelect={(e) => signOut()}>
           <div className="flex w-full gap-2 items-center cursor-pointer">
             <ExitIcon className="w-4 h-4" />

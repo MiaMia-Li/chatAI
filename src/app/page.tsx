@@ -1,240 +1,128 @@
-"use client";
-
-import { ChatLayout } from "@/components/chat/chat-layout";
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogContent,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import UsernameForm from "@/components/username-form";
-import { getSelectedModel } from "@/lib/model-helper";
-import { ChatOllama } from "@langchain/community/chat_models/ollama";
-import { AIMessage, HumanMessage } from "@langchain/core/messages";
-import { BytesOutputParser } from "@langchain/core/output_parsers";
-import { Attachment, ChatRequestOptions } from "ai";
-import { Message, useChat } from "ai/react";
-import React, { useEffect, useRef, useState } from "react";
-import { toast } from "sonner";
-import { v4 as uuidv4 } from "uuid";
-import useChatStore from "./hooks/useChatStore";
+  ArrowRight,
+  TrendingUp,
+  FileText,
+  Target,
+  DollarSign,
+  MessageSquare,
+} from "lucide-react";
+import Link from "next/link";
 
-export default function Home() {
-  const {
-    messages,
-    input,
-    handleInputChange,
-    handleSubmit,
-    isLoading,
-    error,
-    data,
-    stop,
-    setMessages,
-    setInput,
-  } = useChat({
-    onResponse: (response) => {
-      if (response) {
-        setLoadingSubmit(false);
-      }
-    },
-    onError: (error) => {
-      setLoadingSubmit(false);
-      toast.error("An error occurred. Please try again.");
-    },
-  });
-  const [chatId, setChatId] = React.useState<string>("");
-  const [selectedModel, setSelectedModel] = React.useState<string>(
-    getSelectedModel()
-  );
-  const [open, setOpen] = React.useState(false);
-  const [ollama, setOllama] = useState<ChatOllama>();
-  const env = process.env.NODE_ENV;
-  const [loadingSubmit, setLoadingSubmit] = React.useState(false);
-  const formRef = useRef<HTMLFormElement>(null);
-  const base64Images = useChatStore((state) => state.base64Images);
-  const setBase64Images = useChatStore((state) => state.setBase64Images);
-  const attachments = useChatStore((state) => state.attachments);
-  const setAttachments = useChatStore((state) => state.setAttachments);
-
-  useEffect(() => {
-    if (messages.length < 1) {
-      // Generate a random id for the chat
-      console.log("Generating chat id");
-      const id = uuidv4();
-      setChatId(id);
-    }
-  }, [messages]);
-
-  React.useEffect(() => {
-    if (!isLoading && !error && chatId && messages.length > 0) {
-      // Save messages to local storage
-      localStorage.setItem(`chat_${chatId}`, JSON.stringify(messages));
-      // Trigger the storage event to update the sidebar component
-      window.dispatchEvent(new Event("storage"));
-    }
-  }, [chatId, isLoading, error]);
-
-  useEffect(() => {
-    if (env === "production") {
-      const newOllama = new ChatOllama({
-        baseUrl: process.env.NEXT_PUBLIC_OLLAMA_URL || "http://localhost:11434",
-        model: selectedModel,
-      });
-      setOllama(newOllama);
-    }
-
-    if (!localStorage.getItem("ollama_user")) {
-      setOpen(true);
-    }
-  }, [selectedModel]);
-
-  const addMessage = (Message: Message) => {
-    console.log("-addMessage-", Message);
-    messages.push(Message);
-    window.dispatchEvent(new Event("storage"));
-    setMessages([...messages]);
-  };
-
-  // Function to handle chatting with Ollama in production (client side)
-  const handleSubmitProduction = async (
-    e: React.FormEvent<HTMLFormElement>
-  ) => {
-    e.preventDefault();
-
-    addMessage({ role: "user", content: input, id: chatId });
-    setInput("");
-
-    if (ollama) {
-      try {
-        const parser = new BytesOutputParser();
-
-        const stream = await ollama
-          .pipe(parser)
-          .stream(
-            (messages as Message[]).map((m) =>
-              m.role == "user"
-                ? new HumanMessage(m.content)
-                : new AIMessage(m.content)
-            )
-          );
-
-        const decoder = new TextDecoder();
-
-        let responseMessage = "";
-        for await (const chunk of stream) {
-          const decodedChunk = decoder.decode(chunk);
-          responseMessage += decodedChunk;
-          setLoadingSubmit(false);
-          setMessages([
-            ...messages,
-            { role: "assistant", content: responseMessage, id: chatId },
-          ]);
-        }
-        addMessage({ role: "assistant", content: responseMessage, id: chatId });
-        setMessages([...messages]);
-
-        localStorage.setItem(`chat_${chatId}`, JSON.stringify(messages));
-        // Trigger the storage event to update the sidebar component
-        window.dispatchEvent(new Event("storage"));
-      } catch (error) {
-        toast.error("An error occurred. Please try again.");
-        setLoadingSubmit(false);
-      }
-    }
-  };
-
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setLoadingSubmit(true);
-
-    setMessages([...messages]);
-
-    const image_attachments: Attachment[] = base64Images
-      ? base64Images.map((image) => ({
-          contentType: "image/base64", // Content type for base64 images
-          url: image, // The base64 image data
-        }))
-      : [];
-
-    // Prepare the options object with additional body data, to pass the model.
-    const requestOptions: ChatRequestOptions = {
-      options: {
-        body: {
-          selectedModel: selectedModel,
-        },
-      },
-      ...(base64Images && {
-        data: {
-          images: base64Images,
-        },
-        experimental_attachments: image_attachments,
-      }),
-      ...(attachments &&
-        attachments.length > 0 && {
-          data: {
-            markdown: attachments[0].content,
-          },
-          experimental_attachments: [attachments[0]],
-        }),
-    };
-
-    messages.slice(0, -1);
-
-    if (env === "production") {
-      handleSubmitProduction(e);
-      setBase64Images(null);
-      setAttachments(null);
-    } else {
-      // Call the handleSubmit function with the options
-      handleSubmit(e, requestOptions);
-      setBase64Images(null);
-      setAttachments(null);
-    }
-  };
-
-  const onOpenChange = (isOpen: boolean) => {
-    const username = localStorage.getItem("ollama_user");
-    if (username) return setOpen(isOpen);
-
-    localStorage.setItem("ollama_user", "Anonymous");
-    window.dispatchEvent(new Event("storage"));
-    setOpen(isOpen);
-  };
-
+export default function HomePage() {
   return (
-    <main className="flex h-[calc(100dvh)] flex-col items-center ">
-      {/* <Dialog open={open} onOpenChange={onOpenChange}> */}
-      <ChatLayout
-        chatId=""
-        setSelectedModel={setSelectedModel}
-        messages={messages}
-        input={input}
-        handleInputChange={handleInputChange}
-        handleSubmit={onSubmit}
-        isLoading={isLoading}
-        loadingSubmit={loadingSubmit}
-        error={error}
-        stop={stop}
-        navCollapsedSize={10}
-        defaultLayout={[30, 160]}
-        formRef={formRef}
-        setMessages={setMessages}
-        setInput={setInput}
-      />
-      {/* <DialogContent className="flex flex-col space-y-4">
-          <DialogHeader className="space-y-2">
-            <DialogTitle>Welcome to Ollama!</DialogTitle>
-            <DialogDescription>
-              Enter your name to get started. This is just to personalize your
-              experience.
-            </DialogDescription>
-            <UsernameForm setOpen={setOpen} />
-          </DialogHeader>
-        </DialogContent>
-      </Dialog> */}
+    <main className="min-h-screen">
+      {/* Hero Banner */}
+      <section className="relative bg-gradient-to-r from-primary/10 to-primary/5 py-20">
+        <div className="container px-4 md:px-6">
+          <div className="flex flex-col items-center space-y-4 text-center">
+            <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
+              AI-Powered Resume Insights
+            </h1>
+            <p className="max-w-[600px] text-gray-500 md:text-xl/relaxed">
+              Enhance your career journey with intelligent resume analysis and
+              personalized recommendations
+            </p>
+            <Button size="lg" className="mt-6">
+              Get Started <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Core Features */}
+      <section className="py-16">
+        <div className="container px-4 md:px-6">
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+            {features.map((feature) => (
+              <div
+                key={feature.title}
+                className="flex flex-col items-center text-center">
+                <div className="mb-4 rounded-lg bg-primary/10 p-3">
+                  {feature.icon}
+                </div>
+                <h3 className="mb-2 text-xl font-bold">{feature.title}</h3>
+                <p className="mb-4 text-sm text-gray-500">
+                  {feature.description}
+                </p>
+                <Link href={feature.link}>
+                  <Button variant="outline" size="sm">
+                    Learn More
+                  </Button>
+                </Link>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Trends Section */}
+      <section className="bg-gray-50 py-16">
+        <div className="container px-4 md:px-6">
+          <h2 className="mb-8 text-center text-3xl font-bold">
+            Industry Insights
+          </h2>
+          <div className="grid gap-8 md:grid-cols-3">
+            {trends.map((trend) => (
+              <div
+                key={trend.title}
+                className="rounded-lg bg-white p-6 shadow-sm">
+                <h3 className="mb-4 flex items-center text-xl font-bold">
+                  <TrendingUp className="mr-2 h-5 w-5 text-primary" />
+                  {trend.title}
+                </h3>
+                <p className="text-gray-500">{trend.content}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
     </main>
   );
 }
+
+const features = [
+  {
+    icon: <FileText className="h-6 w-6" />,
+    title: "Resume Optimization",
+    link: "resume-optimization",
+    description:
+      "AI-powered analysis to enhance your resume's impact and visibility",
+  },
+  {
+    icon: <Target className="h-6 w-6" />,
+    title: "Job Matching",
+    link: "job-matching",
+    description: "Smart recommendations based on your skills and experience",
+  },
+  {
+    icon: <MessageSquare className="h-6 w-6" />,
+    title: "Interview Prep",
+    link: "interview-prep",
+    description: "AI-assisted interview simulation and personalized coaching",
+  },
+  {
+    icon: <TrendingUp className="h-6 w-6" />,
+    title: "Market Insights",
+    link: "market-insights",
+    description: "Comprehensive analysis of salary trends and industry demands",
+  },
+];
+
+const trends = [
+  {
+    title: "Top Positions",
+    content:
+      "Data Science, Full-Stack Development, and Cloud Architecture lead the market demand",
+  },
+  {
+    title: "Salary Trends",
+    content:
+      "15% average increase in tech salaries across major markets in 2024",
+  },
+  {
+    title: "Skills in Demand",
+    content:
+      "AI/ML, Cloud Computing, and Cybersecurity are the most sought-after skills",
+  },
+];
