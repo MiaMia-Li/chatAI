@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/providers/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import SessionWrapper from "@/components/session-wrapper";
 import Header from "@/components/Header";
+import { AI } from "./ai";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -60,9 +61,11 @@ export default function RootLayout({
         </head>
         <body className={inter.className}>
           <ThemeProvider attribute="class">
-            <Header />
-            {children}
-            <Toaster />
+            <AI>
+              <Header />
+              {children}
+              <Toaster />
+            </AI>
           </ThemeProvider>
         </body>
       </html>
