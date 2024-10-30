@@ -31,21 +31,21 @@ const FileUploader: React.FC<FileUploaderProps> = ({
   });
 
   return (
-    <div className="mb-12">
-      <div {...getRootProps()} className="transition-opacity duration-300">
-        <input {...getInputProps()} />
-        <section className="mb-12 relative">
-          <div className="rounded-lg border-2 border-dashed border-gray-300 p-12 text-center">
-            <h3 className="mt-4 text-xl font-semibold">Upload Your Resume</h3>
-            <p className="mt-2 text-sm text-gray-500">
-              Drag and drop your resume file (PDF or Word) or click to browse
-            </p>
-            <Button className="mt-4" disabled={disabled}>
-              Select File
-            </Button>
-          </div>
-        </section>
-      </div>
+    <div
+      {...getRootProps()}
+      className="flex items-center justify-center transition-opacity duration-300 rounded-lg border-2 h-[200px] border-dashed border-gray-300 text-center w-full">
+      <input {...getInputProps()} />
+      <section className="relative">
+        <div className="text-center">
+          <h3 className="mt-4 text-xl font-semibold">Upload Your Resume</h3>
+          <p className="mt-2 text-sm text-gray-500">
+            Drag and drop your resume file (PDF or Word) or click to browse
+          </p>
+          <Button className="mt-4" disabled={disabled}>
+            Select File
+          </Button>
+        </div>
+      </section>
 
       {/* <div>
         {((attachments && attachments.length > 0) ||

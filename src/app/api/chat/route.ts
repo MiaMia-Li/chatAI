@@ -17,27 +17,82 @@ export async function POST(request: Request) {
     id,
     messages,
     data,
-  }: { id: string; messages: Array<Message>; data: any } = await request.json();
+  }: { id: string; messages: Array<CoreMessage>; data: any } =
+    await request.json();
 
-  console.log("markdown----", data?.markdown);
+  //
 
   // const session = await auth();
 
   // if (!session) {
   //   return new Response("Unauthorized", { status: 401 });
   // }
-
-  const coreMessages = convertToCoreMessages(messages);
-  const updatedMessages = coreMessages.map((msg, index) =>
-    index === 0 ? { ...msg, content: msg.content + data?.markdown || "" } : msg
-  );
+  const resumeAnalysisSchema = z.object({
+    score: z.number().min(0).max(100),
+    scoreCategories: z.array(
+      z.object({
+        name: z.string(),
+        score: z.number().min(0).max(100),
+      })
+    ),
+    sections: z.array(
+      z.object({
+        id: z.string(),
+        name: z.string(),
+        suggestions: z.array(
+          z.object({
+            title: z.string(),
+            description: z.string(),
+            priority: z.enum(["high", "medium", "low"]),
+          })
+        ),
+      })
+    ),
+    basicInfo: z.object({
+      name: z.string(),
+      email: z.string(),
+      phone: z.string(),
+      education: z.string(),
+      summary: z.string().optional(),
+    }),
+    workExperience: z.array(
+      z.object({
+        company: z.string(),
+        position: z.string(),
+        period: z.string(),
+        description: z.string(),
+        achievements: z.array(z.string()).optional(),
+      })
+    ),
+    skills: z.array(z.string()),
+  });
+  // const coreMessages = convertToCoreMessages(messages);
+  // const updatedMessages = coreMessages.map((msg, index) =>
+  //   index === 0 ? { ...msg, content: msg.content + data?.markdown || "" } : msg
+  // );
 
   const result = await streamText({
     model: openai("gpt-4o-mini"),
+    messages,
     system:
-      "you are a friendly assistant! keep your responses concise and helpful.",
-    messages: updatedMessages,
+      "You are a professional resume analyst. Please analyze the resume content in detail and provide scores and improvement suggestions,Scoring from three aspects: Content Quality, Keyword Optimization, Structure & Format then give a summary and total score of the resume。Only need to use the tools provided analyzeResume when messages is markdown type.When use the tools, you need to ask for confirmation first.when receive yes, then use the tools to analyze the resume, when receive no, then stop.",
     maxSteps: 5,
+    tools: {
+      analyzeResume: {
+        description:
+          "Analyze the resume content and provide scores and suggestions",
+        parameters: resumeAnalysisSchema,
+        execute: async (resumeData) => {
+          return resumeData;
+        },
+      },
+      askForConfirmation: {
+        description: "Ask the user for confirmation.",
+        parameters: z.object({
+          message: z.string().describe("The message to ask for confirmation."),
+        }),
+      },
+    },
     // tools: {
     //   getWeather: {
     //     description: "Get the current weather at a location",
@@ -72,6 +127,7 @@ export async function POST(request: Request) {
     //   isEnabled: true,
     //   functionId: "stream-text",
     // },
+    // experimental_toolCallStreaming: true,
   });
 
   return result.toDataStreamResponse({});

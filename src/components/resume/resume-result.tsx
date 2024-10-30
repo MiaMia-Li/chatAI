@@ -97,7 +97,7 @@ export default function ResumeResult({ data }: { data?: ResumeData }) {
           </div>
 
           <div className="mt-8 grid gap-4 md:grid-cols-3">
-            {data.scoreCategories.map((category) => (
+            {data?.scoreCategories?.map((category) => (
               <div key={category.name} className="space-y-2">
                 <div className="flex justify-between">
                   <span className="text-sm font-medium text-foreground">
@@ -118,18 +118,18 @@ export default function ResumeResult({ data }: { data?: ResumeData }) {
       <section>
         <Tabs defaultValue="skills">
           <TabsList className="mb-4">
-            {data.sections.map((section) => (
+            {data?.sections?.map((section) => (
               <TabsTrigger key={section.id} value={section.id}>
                 {section.name}
               </TabsTrigger>
             ))}
           </TabsList>
 
-          {data.sections.map((section) => (
+          {data?.sections?.map((section) => (
             <TabsContent key={section.id} value={section.id}>
               <Card>
                 <div className="divide-y">
-                  {section.suggestions.map((suggestion, index) => (
+                  {section?.suggestions?.map((suggestion, index) => (
                     <div
                       key={index}
                       className="flex items-center justify-between p-4">

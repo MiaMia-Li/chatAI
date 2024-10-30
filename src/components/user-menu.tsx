@@ -8,12 +8,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import UserLogin from "./user-login";
 
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import {
   PlusCircledIcon,
+  RocketIcon,
   ExitIcon,
   GearIcon,
   MixIcon,
@@ -56,10 +56,6 @@ export default function UserMenu() {
 
     fetchData();
   }, [session]);
-
-  if (!session) {
-    return <UserLogin />;
-  }
 
   return (
     <DropdownMenu>
@@ -106,6 +102,14 @@ export default function UserMenu() {
             href="/settings">
             <GearIcon className="w-4 h-4" />
             Settings
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem>
+          <Link
+            className="flex w-full gap-2 items-center cursor-pointer"
+            href="/pricing">
+            <RocketIcon className="w-4 h-4" />
+            Upgrade Plan
           </Link>
         </DropdownMenuItem>
 
