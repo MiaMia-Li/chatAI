@@ -44,7 +44,7 @@ export async function POST(req: Request) {
     stripe_customer_id = ${String(subscription.customer)},
     stripe_price_id = ${String(subscription.items.data[0].price.id)},
     stripe_current_period_end = to_timestamp(${subscription.current_period_end})
-  WHERE id = ${session?.metadata?.user_id}
+  WHERE id = ${session?.metadata?.userId}
 `;
   }
 
