@@ -255,7 +255,11 @@ export default function ChatList({
                           addToolResult({ toolCallId, result });
                         const { toolName, args, toolCallId } = toolInvocation;
                         if (toolName === "analyzeResume") {
-                          return <ResumeResult data={args} />;
+                          return (
+                            <div key={toolCallId}>
+                              <ResumeResult data={args} />
+                            </div>
+                          );
                         }
                         if (toolInvocation.toolName === "askForConfirmation") {
                           return (
@@ -283,8 +287,6 @@ export default function ChatList({
                           );
                         }
                         return null;
-
-                        //render confirmation tool (client-side tool with user interaction)
                       }
                     )}
                     {isLoading &&
