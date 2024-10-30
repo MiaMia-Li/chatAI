@@ -7,12 +7,11 @@ import { toast } from "sonner";
 import PreviewAttachment from "../preview-attachment";
 import FileUploader from "./file-upload";
 import { Button } from "../ui/button";
-import Loading from "@/components/Loading";
 import TextareaAutosize from "react-textarea-autosize";
 import { SendHorizonal } from "lucide-react";
-import { env } from "process";
 import { AnimatePresence } from "framer-motion";
 import MultiFilePicker from "../file-embedder";
+import Loading from "../loading";
 
 export default function Resumebar({
   messages,
