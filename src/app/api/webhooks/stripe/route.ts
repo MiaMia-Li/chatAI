@@ -43,9 +43,9 @@ export async function POST(req: Request) {
     stripe_subscription_id = ${String(subscription.id)},
     stripe_customer_id = ${String(subscription.customer)},
     stripe_price_id = ${String(subscription.items.data[0].price.id)},
-    stripe_current_period_end = ${subscription.current_period_end * 1000}
-  WHERE id = 1
-  `;
+    stripe_current_period_end = to_timestamp(${subscription.current_period_end})
+  WHERE id = ${session?.metadata?.user_id}
+`;
   }
 
   if (event.type === "invoice.payment_succeeded") {
