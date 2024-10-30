@@ -14,7 +14,7 @@ export type responseAction = {
 };
 
 // const billingUrl = absoluteUrl("/dashboard/billing")
-const billingUrl = "http://localhost:3000/pricing";
+const billingUrl = "https://chat-ai-rho-one.vercel.app/pricing";
 
 export async function generateUserStripe(
   priceId: string
