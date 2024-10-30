@@ -12,6 +12,10 @@ import { INITIAL_QUESTIONS } from "@/utils/initial-questions";
 import { Button } from "../ui/button";
 import PreviewAttachment from "../preview-attachment";
 import useUserStore from "@/app/hooks/useUserStore";
+import ResumeHeader from "../resume/resume-header";
+import { ToolInvocation } from "ai";
+import ResumeResult from "../resume/resume-result";
+// import { Message, useChat } from "ai/react";
 
 export default function ChatList({
   messages,
@@ -21,6 +25,7 @@ export default function ChatList({
   isLoading,
   error,
   stop,
+  addToolResult,
   loadingSubmit,
   formRef,
   isMobile,
@@ -47,8 +52,6 @@ export default function ChatList({
       setLocalStorageIsLoading(false);
     }
   }, []);
-
-  console.log("---chatList", messages);
 
   useEffect(() => {
     // Fetch 4 initial questions
@@ -87,59 +90,62 @@ export default function ChatList({
   };
 
   messages.map((m) => console.log(m.experimental_attachments));
-
   if (messages.length === 0) {
-    return (
-      <div className="w-full h-full flex justify-center items-center">
-        <div className="relative flex flex-col gap-4 items-center justify-center w-full h-full">
-          <div></div>
-          <div className="flex flex-col gap-4 items-center">
-            <Image
-              src="/ollama.png"
-              alt="AI"
-              width={60}
-              height={60}
-              className="h-20 w-14 object-contain dark:invert"
-            />
-            <p className="text-center text-lg text-muted-foreground">
-              How can I help you today?
-            </p>
-          </div>
-
-          <div className="absolute bottom-0 w-full px-4 sm:max-w-3xl grid gap-2 sm:grid-cols-2 sm:gap-4 text-sm">
-            {/* Only display 4 random questions */}
-            {initialQuestions.length > 0 &&
-              initialQuestions.map((message) => {
-                const delay = Math.random() * 0.25;
-
-                return (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 1, y: 10, x: 0 }}
-                    animate={{ opacity: 1, scale: 1, y: 0, x: 0 }}
-                    exit={{ opacity: 0, scale: 1, y: 10, x: 0 }}
-                    transition={{
-                      opacity: { duration: 0.1, delay },
-                      scale: { duration: 0.1, delay },
-                      y: { type: "spring", stiffness: 100, damping: 10, delay },
-                    }}
-                    key={message.content}>
-                    <Button
-                      key={message.content}
-                      type="button"
-                      variant="outline"
-                      className="sm:text-start px-4 py-8 flex w-full justify-center sm:justify-start items-center text-sm whitespace-pre-wrap"
-                      onClick={(e) => onClickQuestion(message.content, e)}>
-                      {message.content}
-                    </Button>
-                  </motion.div>
-                );
-              })}
-          </div>
-        </div>
-      </div>
-    );
+    return <ResumeHeader />;
   }
 
+  // if (messages.length === 0) {
+  //   return (
+  //     <div className="w-full h-full flex justify-center items-center">
+  //       <div className="relative flex flex-col gap-4 items-center justify-center w-full h-full">
+  //         <div></div>
+  //         <div className="flex flex-col gap-4 items-center">
+  //           <Image
+  //             src="/ollama.png"
+  //             alt="AI"
+  //             width={60}
+  //             height={60}
+  //             className="h-20 w-14 object-contain dark:invert"
+  //           />
+  //           <p className="text-center text-lg text-muted-foreground">
+  //             How can I help you today?
+  //           </p>
+  //         </div>
+
+  //         <div className="absolute bottom-0 w-full px-4 sm:max-w-3xl grid gap-2 sm:grid-cols-2 sm:gap-4 text-sm">
+  //           {/* Only display 4 random questions */}
+  //           {initialQuestions.length > 0 &&
+  //             initialQuestions.map((message) => {
+  //               const delay = Math.random() * 0.25;
+
+  //               return (
+  //                 <motion.div
+  //                   initial={{ opacity: 0, scale: 1, y: 10, x: 0 }}
+  //                   animate={{ opacity: 1, scale: 1, y: 0, x: 0 }}
+  //                   exit={{ opacity: 0, scale: 1, y: 10, x: 0 }}
+  //                   transition={{
+  //                     opacity: { duration: 0.1, delay },
+  //                     scale: { duration: 0.1, delay },
+  //                     y: { type: "spring", stiffness: 100, damping: 10, delay },
+  //                   }}
+  //                   key={message.content}>
+  //                   <Button
+  //                     key={message.content}
+  //                     type="button"
+  //                     variant="outline"
+  //                     className="sm:text-start px-4 py-8 flex w-full justify-center sm:justify-start items-center text-sm whitespace-pre-wrap"
+  //                     onClick={(e) => onClickQuestion(message.content, e)}>
+  //                     {message.content}
+  //                   </Button>
+  //                 </motion.div>
+  //               );
+  //             })}
+  //         </div>
+  //       </div>
+  //     </div>
+  //   );
+  // }
+  console.log("--messages", messages);
   return (
     <div
       id="scroller"
@@ -196,7 +202,9 @@ export default function ChatList({
                         }
                       )}
                     </div>
-                    <p className="text-end">{message.content}</p>
+                    {!message.experimental_attachments && (
+                      <p className="text-end">{message.content}</p>
+                    )}
                   </div>
                   <Avatar className="flex justify-start items-center overflow-hidden">
                     <AvatarImage
@@ -240,6 +248,45 @@ export default function ChatList({
                         );
                       }
                     })}
+                    {/* toolInvocations */}
+                    {message.toolInvocations?.map(
+                      (toolInvocation: ToolInvocation) => {
+                        const addResult = (result: string) =>
+                          addToolResult({ toolCallId, result });
+                        const { toolName, args, toolCallId } = toolInvocation;
+                        if (toolName === "analyzeResume") {
+                          return <ResumeResult data={args} />;
+                        }
+                        if (toolInvocation.toolName === "askForConfirmation") {
+                          return (
+                            <div key={toolCallId}>
+                              {toolInvocation.args.message}
+                              <div>
+                                {"result" in toolInvocation ? (
+                                  <b>{toolInvocation.result}</b>
+                                ) : (
+                                  <>
+                                    <Button
+                                      onClick={() => addResult("Yes")}
+                                      variant="outline">
+                                      Yes
+                                    </Button>
+                                    <Button
+                                      onClick={() => addResult("No")}
+                                      variant="outline">
+                                      No
+                                    </Button>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        }
+                        return null;
+
+                        //render confirmation tool (client-side tool with user interaction)
+                      }
+                    )}
                     {isLoading &&
                       messages.indexOf(message) === messages.length - 1 && (
                         <span className="animate-pulse" aria-label="Typing">

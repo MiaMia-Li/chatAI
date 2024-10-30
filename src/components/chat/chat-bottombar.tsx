@@ -21,6 +21,7 @@ import Image from "next/image";
 import MultiFilePicker from "../file-embedder";
 import { toast } from "sonner";
 import PreviewAttachment from "../preview-attachment";
+import FileUploader from "../resume/file-upload";
 
 export default function ChatBottombar({
   messages,
@@ -117,7 +118,7 @@ export default function ChatBottombar({
         );
 
         setAttachments((current) => [...(current || []), ...validAttachments]);
-        // setInput && setInput(validAttachments[0].content || "");
+        // setInput && setInput(validAttachments[0].content);
       } catch (error) {
         console.error("Error uploading files:", error);
       } finally {
@@ -172,10 +173,11 @@ export default function ChatBottombar({
                 onSubmit={handleSubmit}
                 className="w-full items-center flex relative gap-2">
                 <div className="absolute flex left-3 z-10">
-                  <MultiImagePicker
+                  {/* <FileUploader onFilesPick={handleFilesPick} /> */}
+                  {/* <MultiImagePicker
                     disabled={env === "production"}
                     onImagesPick={setBase64Images}
-                  />
+                  /> */}
                   <MultiFilePicker
                     disabled={env === "production"}
                     onFilesPick={handleFilesPick}
@@ -191,14 +193,14 @@ export default function ChatBottombar({
                   onChange={handleInputChange}
                   name="message"
                   placeholder={
-                    !isListening ? "Enter your prompt here" : "Listening"
+                    !isListening ? "Upload Resume here" : "Listening"
                   }
-                  className=" max-h-24 pr-14 pl-24 bg-accent py-[22px] rounded-lg  text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 w-full flex items-center h-16 resize-none overflow-hidden dark:bg-card"
+                  className=" max-h-24 pr-14 pl-14 bg-accent py-[22px] rounded-lg  text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 w-full flex items-center h-16 resize-none overflow-hidden dark:bg-card"
                 />
 
                 {!isLoading ? (
                   <div className="flex absolute right-3 items-center">
-                    {isListening ? (
+                    {/* {isListening ? (
                       <div className="flex">
                         <Button
                           className="shrink-0 relative rounded-full bg-blue-500/30 hover:bg-blue-400/30 "
@@ -221,7 +223,7 @@ export default function ChatBottombar({
                         disabled={isLoading}>
                         <Mic className="w-5 h-5 " />
                       </Button>
-                    )}
+                    )} */}
                     <Button
                       className="shrink-0 rounded-full"
                       variant="ghost"
@@ -258,7 +260,7 @@ export default function ChatBottombar({
             </div>
 
             <div className="flex px-2 pb-2 gap-2 ">
-              {base64Images &&
+              {/* {base64Images &&
                 base64Images.map((image, index) => {
                   return (
                     <div
@@ -285,7 +287,7 @@ export default function ChatBottombar({
                       </Button>
                     </div>
                   );
-                })}
+                })} */}
               {((attachments && attachments.length > 0) ||
                 uploadQueue.length > 0) && (
                 <div className="flex flex-row gap-2">

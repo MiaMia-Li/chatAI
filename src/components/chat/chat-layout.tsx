@@ -31,6 +31,7 @@ export function ChatLayout({
   input,
   handleInputChange,
   handleSubmit,
+  addToolResult,
   isLoading,
   error,
   stop,
@@ -62,66 +63,83 @@ export function ChatLayout({
   }, []);
 
   return (
-    <ResizablePanelGroup
-      direction="horizontal"
-      onLayout={(sizes: number[]) => {
-        document.cookie = `react-resizable-panels:layout=${JSON.stringify(
-          sizes
-        )}`;
-      }}
-      className="h-screen items-stretch">
-      <ResizablePanel
-        defaultSize={defaultLayout[0]}
-        collapsedSize={navCollapsedSize}
-        collapsible={true}
-        minSize={isMobile ? 0 : 12}
-        maxSize={isMobile ? 0 : 16}
-        onCollapse={() => {
-          setIsCollapsed(true);
-          document.cookie = `react-resizable-panels:collapsed=${JSON.stringify(
-            true
-          )}`;
-        }}
-        onExpand={() => {
-          setIsCollapsed(false);
-          document.cookie = `react-resizable-panels:collapsed=${JSON.stringify(
-            false
-          )}`;
-        }}
-        className={cn(
-          isCollapsed
-            ? "min-w-[50px] md:min-w-[70px] transition-all duration-300 ease-in-out"
-            : "hidden md:block"
-        )}>
-        <Sidebar
-          isCollapsed={false}
-          messages={messages}
-          isMobile={isMobile}
-          chatId={chatId}
-          setMessages={setMessages}
-        />
-      </ResizablePanel>
-      <ResizableHandle className={cn("hidden md:flex")} withHandle />
-      <ResizablePanel
-        className="h-full w-full flex justify-center"
-        defaultSize={defaultLayout[1]}>
-        <Chat
-          chatId={chatId}
-          setSelectedModel={setSelectedModel}
-          messages={messages}
-          input={input}
-          handleInputChange={handleInputChange}
-          handleSubmit={handleSubmit}
-          isLoading={isLoading}
-          loadingSubmit={loadingSubmit}
-          error={error}
-          stop={stop}
-          formRef={formRef}
-          isMobile={isMobile}
-          setInput={setInput}
-          setMessages={setMessages}
-        />
-      </ResizablePanel>
-    </ResizablePanelGroup>
+    // <ResizablePanelGroup
+    //   direction="horizontal"
+    //   onLayout={(sizes: number[]) => {
+    //     document.cookie = `react-resizable-panels:layout=${JSON.stringify(
+    //       sizes
+    //     )}`;
+    //   }}
+    //   className="h-screen items-stretch">
+    //   <ResizablePanel
+    //     defaultSize={defaultLayout[0]}
+    //     collapsedSize={navCollapsedSize}
+    //     collapsible={true}
+    //     minSize={isMobile ? 0 : 12}
+    //     maxSize={isMobile ? 0 : 16}
+    //     onCollapse={() => {
+    //       setIsCollapsed(true);
+    //       document.cookie = `react-resizable-panels:collapsed=${JSON.stringify(
+    //         true
+    //       )}`;
+    //     }}
+    //     onExpand={() => {
+    //       setIsCollapsed(false);
+    //       document.cookie = `react-resizable-panels:collapsed=${JSON.stringify(
+    //         false
+    //       )}`;
+    //     }}
+    //     className={cn(
+    //       isCollapsed
+    //         ? "min-w-[50px] md:min-w-[70px] transition-all duration-300 ease-in-out"
+    //         : "hidden md:block"
+    //     )}>
+    //     <Sidebar
+    //       isCollapsed={false}
+    //       messages={messages}
+    //       isMobile={isMobile}
+    //       chatId={chatId}
+    //       setMessages={setMessages}
+    //     />
+    //   </ResizablePanel>
+    //   <ResizableHandle className={cn("hidden md:flex")} withHandle />
+    //   <ResizablePanel
+    //     className="h-full w-full flex justify-center"
+    //     defaultSize={defaultLayout[1]}>
+    //     <Chat
+    //       chatId={chatId}
+    //       setSelectedModel={setSelectedModel}
+    //       messages={messages}
+    //       input={input}
+    //       handleInputChange={handleInputChange}
+    //       handleSubmit={handleSubmit}
+    //       isLoading={isLoading}
+    //       loadingSubmit={loadingSubmit}
+    //       error={error}
+    //       stop={stop}
+    //       formRef={formRef}
+    //       isMobile={isMobile}
+    //       setInput={setInput}
+    //       setMessages={setMessages}
+    //     />
+    //   </ResizablePanel>
+    // </ResizablePanelGroup>
+    <Chat
+      chatId={chatId}
+      setSelectedModel={setSelectedModel}
+      messages={messages}
+      input={input}
+      handleInputChange={handleInputChange}
+      handleSubmit={handleSubmit}
+      isLoading={isLoading}
+      loadingSubmit={loadingSubmit}
+      error={error}
+      stop={stop}
+      formRef={formRef}
+      isMobile={isMobile}
+      setInput={setInput}
+      setMessages={setMessages}
+      addToolResult={addToolResult}
+    />
   );
 }

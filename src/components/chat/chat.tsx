@@ -5,6 +5,7 @@ import ChatBottombar from "./chat-bottombar";
 import { Message, useChat } from "ai/react";
 import { ChatRequestOptions } from "ai";
 import { v4 as uuidv4 } from "uuid";
+import ResumeBar from "../resume/resume-bar";
 
 export interface ChatProps {
   chatId?: string;
@@ -20,6 +21,13 @@ export interface ChatProps {
   loadingSubmit?: boolean;
   error: undefined | Error;
   stop: () => void;
+  addToolResult: ({
+    toolCallId,
+    result,
+  }: {
+    toolCallId: string;
+    result: string;
+  }) => void;
   formRef: React.RefObject<HTMLFormElement>;
   isMobile?: boolean;
   setInput?: React.Dispatch<React.SetStateAction<string>>;
@@ -39,20 +47,22 @@ export default function Chat({
   loadingSubmit,
   formRef,
   isMobile,
+  addToolResult,
   setInput,
   setMessages,
 }: ChatProps) {
   return (
     <div className="flex flex-col justify-between w-full max-w-3xl h-full ">
-      <ChatTopbar
+      {/* <ChatTopbar
         setSelectedModel={setSelectedModel}
         isLoading={isLoading}
         chatId={chatId}
         messages={messages}
         setMessages={setMessages}
-      />
+      /> */}
 
       <ChatList
+        addToolResult={addToolResult}
         setSelectedModel={setSelectedModel}
         messages={messages}
         input={input}
@@ -67,7 +77,8 @@ export default function Chat({
         setMessages={setMessages}
       />
 
-      <ChatBottombar
+      <ResumeBar
+        addToolResult={addToolResult}
         setSelectedModel={setSelectedModel}
         messages={messages}
         input={input}
