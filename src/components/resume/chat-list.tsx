@@ -14,7 +14,7 @@ import PreviewAttachment from "../preview-attachment";
 import useUserStore from "@/app/hooks/useUserStore";
 import { ToolInvocation } from "ai";
 import ResumeResult from "../resume/resume-result";
-import { ResumeUploadSection } from "../resume/ResumeUploadSection";
+// import { ResumeUploadSection } from "../resume/ResumeUploadSection";
 // import { Message, useChat } from "ai/react";
 
 export default function ChatList({
@@ -90,9 +90,6 @@ export default function ChatList({
   };
 
   messages.map((m) => console.log(m.experimental_attachments));
-  if (messages.length === 0) {
-    return <ResumeUploadSection />;
-  }
 
   console.log("--messages", messages);
   return (

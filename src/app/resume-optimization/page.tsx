@@ -1,33 +1,33 @@
 "use client";
 
-import { ChatLayout } from "@/components/chat/chat-layout";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogContent,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import UsernameForm from "@/components/username-form";
-import { getSelectedModel } from "@/lib/model-helper";
-import { ChatOllama } from "@langchain/community/chat_models/ollama";
-import { AIMessage, HumanMessage } from "@langchain/core/messages";
-import { BytesOutputParser } from "@langchain/core/output_parsers";
-import { Attachment, ChatRequestOptions, generateId } from "ai";
-import { Message, useChat } from "ai/react";
-import React, { useEffect, useRef, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useCallback, useRef, useState } from "react";
+import { Sparkles, Brain, FileSearch, ChartLine, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import ResumeResult from "@/components/resume/resume-result";
+import useChatStore from "@/app/hooks/useChatStore";
+import { useChat } from "ai/react";
 import { v4 as uuidv4 } from "uuid";
-import useChatStore from "../hooks/useChatStore";
-import ResumeHeader from "@/components/resume/resume-header";
-import { motion } from "framer-motion";
-import { ClientMessage, continueConversation } from "../actions/resume-action";
-import { useActions, useUIState } from "ai/rsc";
+import { Feature, UploadedFile } from "@/types";
+import FileUploader from "@/components/resume/file-upload";
+import {
+  FeatureGrid,
+  PageHeader,
+  ParticleEffects,
+} from "@/components/resume/ResumeAnalysisPage";
+import { Button } from "@/components/ui/button";
+import Chat from "@/components/resume/chat";
 
-export default function Home() {
+export const HomePage = () => {
+  const [chatId] = useState(() => uuidv4());
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const setAttachments = useChatStore((state) => state.setAttachments);
+  const attachments = useChatStore((state) => state.attachments);
+  const [loadingSubmit, setLoadingSubmit] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
+
   const {
     messages,
     input,
@@ -48,6 +48,8 @@ export default function Home() {
       }
     },
     onError: (error) => {
+      toast.error(error.message);
+      setIsAnalyzing(false);
       setLoadingSubmit(false);
       toast.error("An error occurred. Please try again.");
     },
@@ -58,209 +60,212 @@ export default function Home() {
       }
     },
   });
-  const [conversation, setConversation] = useUIState();
-  const { continueConversation } = useActions();
-  const [chatId, setChatId] = React.useState<string>("");
-  const [selectedModel, setSelectedModel] = React.useState<string>(
-    getSelectedModel()
-  );
-  const [open, setOpen] = React.useState(false);
-  const [ollama, setOllama] = useState<ChatOllama>();
-  const env = process.env.NODE_ENV;
-  const [loadingSubmit, setLoadingSubmit] = React.useState(false);
-  const formRef = useRef<HTMLFormElement>(null);
-  const base64Images = useChatStore((state) => state.base64Images);
-  const setBase64Images = useChatStore((state) => state.setBase64Images);
-  const attachments = useChatStore((state) => state.attachments);
-  const setAttachments = useChatStore((state) => state.setAttachments);
 
-  useEffect(() => {
-    if (messages.length < 1) {
-      // Generate a random id for the chat
-      console.log("Generating chat id");
-      const id = uuidv4();
-      setChatId(id);
-    }
-  }, [messages]);
+  const uploadFile = useCallback(
+    async (
+      file: File
+    ): Promise<
+      | { url: string; name: string; contentType: string; content: string }
+      | undefined
+    > => {
+      const formData = new FormData();
+      formData.append("file", file);
 
-  React.useEffect(() => {
-    if (!isLoading && !error && chatId && messages.length > 0) {
-      // Save messages to local storage
-      localStorage.setItem(`chat_${chatId}`, JSON.stringify(messages));
-      // Trigger the storage event to update the sidebar component
-      window.dispatchEvent(new Event("storage"));
-    }
-  }, [chatId, isLoading, error]);
-
-  useEffect(() => {
-    if (env === "production") {
-      const newOllama = new ChatOllama({
-        baseUrl: process.env.NEXT_PUBLIC_OLLAMA_URL || "http://localhost:11434",
-        model: selectedModel,
-      });
-      setOllama(newOllama);
-    }
-
-    if (!localStorage.getItem("ollama_user")) {
-      setOpen(true);
-    }
-  }, [selectedModel]);
-
-  const addMessage = (Message: Message) => {
-    console.log("-addMessage-", Message);
-    messages.push(Message);
-    window.dispatchEvent(new Event("storage"));
-    setMessages([...messages]);
-  };
-
-  // Function to handle chatting with Ollama in production (client side)
-  const handleSubmitProduction = async (
-    e: React.FormEvent<HTMLFormElement>
-  ) => {
-    e.preventDefault();
-
-    addMessage({ role: "user", content: input, id: chatId });
-    setInput("");
-
-    if (ollama) {
       try {
-        const parser = new BytesOutputParser();
+        const response = await fetch(`/api/files/upload`, {
+          method: "POST",
+          body: formData,
+        });
 
-        const stream = await ollama
-          .pipe(parser)
-          .stream(
-            (messages as Message[]).map((m) =>
-              m.role == "user"
-                ? new HumanMessage(m.content)
-                : new AIMessage(m.content)
-            )
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(
+            errorData.error || "Server error during file upload."
           );
-
-        const decoder = new TextDecoder();
-
-        let responseMessage = "";
-        for await (const chunk of stream) {
-          const decodedChunk = decoder.decode(chunk);
-          responseMessage += decodedChunk;
-          setLoadingSubmit(false);
-          setMessages([
-            ...messages,
-            { role: "assistant", content: responseMessage, id: chatId },
-          ]);
         }
-        addMessage({ role: "assistant", content: responseMessage, id: chatId });
-        setMessages([...messages]);
 
-        localStorage.setItem(`chat_${chatId}`, JSON.stringify(messages));
-        // Trigger the storage event to update the sidebar component
-        window.dispatchEvent(new Event("storage"));
+        const { url, pathname, contentType, markdown } = await response.json();
+        return { url, name: pathname, contentType, content: markdown };
       } catch (error) {
-        toast.error("An error occurred. Please try again.");
-        setLoadingSubmit(false);
+        console.error("File upload error:", error);
+        toast.error((error as Error).message || "Upload failed, try again.");
+        return undefined;
       }
-    }
-  };
+    },
+    []
+  );
 
-  const onSubmit = (e?: React.FormEvent<HTMLFormElement>) => {
-    e && e?.preventDefault();
-    setLoadingSubmit(true);
-    console.log("--messa--onSubmit-ges", messages);
-    setMessages([...messages]);
+  const handleFilesPick = useCallback(
+    async (files: File[]) => {
+      if (files.length === 0) return;
 
-    const image_attachments: Attachment[] = base64Images
-      ? base64Images.map((image) => ({
-          contentType: "image/base64", // Content type for base64 images
-          url: image, // The base64 image data
-        }))
-      : [];
+      setIsUploading(true);
+      setUploadProgress(0);
 
-    // Prepare the options object with additional body data, to pass the model.
-    const requestOptions: ChatRequestOptions = {
-      options: {
-        body: {
-          selectedModel: selectedModel,
-        },
-      },
-      ...(base64Images && {
-        data: {
-          images: base64Images,
-        },
-        experimental_attachments: image_attachments,
-      }),
-      ...(attachments &&
-        attachments.length > 0 && {
-          experimental_attachments: [attachments[0]],
-        }),
-    };
+      const progressInterval = setInterval(() => {
+        setUploadProgress((prev) => Math.min(prev + Math.random() * 30, 95));
+      }, 500);
 
-    messages.slice(0, -1);
+      try {
+        const uploadPromises = files.map(uploadFile);
+        const uploadedFiles = await Promise.all(uploadPromises);
+        const validAttachments = uploadedFiles.filter(
+          (
+            file
+          ): file is {
+            url: string;
+            name: string;
+            contentType: string;
+            content: string;
+          } => file !== undefined
+        );
+        setUploadedFile(files[0]);
+        setUploadProgress(100);
+        setAttachments((current) => [...(current || []), ...validAttachments]);
+        setInput && setInput(validAttachments[0].content);
+      } catch (error) {
+        console.error("Error uploading files:", error);
+        toast.error("Upload failed. Please try again.");
+      } finally {
+        clearInterval(progressInterval);
+        setIsUploading(false);
+      }
+    },
+    [uploadFile, setAttachments, setInput]
+  );
 
-    if (env === "production") {
-      handleSubmitProduction(e);
-      setBase64Images(null);
-      setAttachments(null);
-    } else {
-      // Call the handleSubmit function with the options
-      handleSubmit(e, requestOptions);
-      // sendMessage(attachments?.length ? attachments[0].content || "" : "");
-      setBase64Images(null);
-      setAttachments(null);
-    }
-  };
-  const sendMessage = async (input: string) => {
-    setConversation((currentConversation: ClientMessage[]) => [
-      ...currentConversation,
-      { id: generateId(), role: "user", display: input },
-    ]);
-
-    const message = await continueConversation(input);
-
-    setConversation((currentConversation: ClientMessage[]) => [
-      ...currentConversation,
-      message,
-    ]);
-  };
-  const onOpenChange = (isOpen: boolean) => {
-    const username = localStorage.getItem("ollama_user");
-    if (username) return setOpen(isOpen);
-
-    localStorage.setItem("ollama_user", "Anonymous");
-    window.dispatchEvent(new Event("storage"));
-    setOpen(isOpen);
-  };
+  // 处理分析提交
+  const handleAnalysis = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!uploadedFile) {
+        toast.error("Please upload a file first");
+        return;
+      }
+      setInput(attachments?.[0]?.content || "");
+      setIsAnalyzing(true);
+      handleSubmit(e);
+    },
+    [uploadedFile, handleSubmit]
+  );
 
   return (
-    <div className="flex flex-col items-center ">
-      {/* <Dialog open={open} onOpenChange={onOpenChange}> */}
-      <ChatLayout
-        chatId=""
-        setSelectedModel={setSelectedModel}
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 via-white to-white dark:from-gray-900 dark:via-gray-900 dark:to-gray-900">
+      <div className="container mx-auto px-4 py-12">
+        <PageHeader />
+        <FeatureGrid />
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="max-w-3xl mx-auto">
+          <FileUploader
+            onFilesPick={handleFilesPick}
+            disabled={isUploading || isAnalyzing}
+            progress={uploadProgress}
+          />
+
+          <AnimatePresence>
+            {uploadedFile && (
+              <AnalysisSection
+                isAnalyzing={isAnalyzing}
+                onAnalyze={handleAnalysis}
+                isLoading={isLoading}
+              />
+            )}
+          </AnimatePresence>
+        </motion.div>
+      </div>
+      <Chat
+        chatId={chatId}
         messages={messages}
         input={input}
+        // setSelectedModel={setSelectedModel}
         handleInputChange={handleInputChange}
-        handleSubmit={onSubmit}
+        handleSubmit={handleSubmit}
         isLoading={isLoading}
         loadingSubmit={loadingSubmit}
         error={error}
         stop={stop}
-        navCollapsedSize={10}
-        defaultLayout={[30, 160]}
         formRef={formRef}
-        setMessages={setMessages}
+        // isMobile={isMobile}
         setInput={setInput}
+        setMessages={setMessages}
         addToolResult={addToolResult}
       />
-      {/* <DialogContent className="flex flex-col space-y-4">
-          <DialogHeader className="space-y-2">
-            <DialogTitle>Welcome to Ollama!</DialogTitle>
-            <DialogDescription>
-              Enter your name to get started. This is just to personalize your
-              experience.
-            </DialogDescription>
-            <UsernameForm setOpen={setOpen} />
-          </DialogHeader>
-        </DialogContent>
-      </Dialog> */}
     </div>
   );
+};
+
+// 组件拆分
+
+interface AnalysisSectionProps {
+  isAnalyzing: boolean;
+  onAnalyze: (e: React.FormEvent) => void;
+  isLoading: boolean;
 }
+
+const AnalysisSection: React.FC<AnalysisSectionProps> = ({
+  isAnalyzing,
+  onAnalyze,
+  isLoading,
+}) => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -20 }}
+    className="mt-8 text-center">
+    <motion.div
+      whileHover={{ scale: isAnalyzing ? 1 : 1.02 }}
+      whileTap={{ scale: isAnalyzing ? 1 : 0.98 }}
+      className="relative inline-block">
+      <div className="absolute inset-0 bg-blue-500/20 dark:bg-blue-400/20 rounded-full blur-xl" />
+      <form onSubmit={onAnalyze}>
+        <Button
+          type="submit"
+          size="lg"
+          disabled={isAnalyzing || isLoading}
+          className="relative bg-gradient-to-r from-blue-500 to-blue-600 
+            hover:from-blue-600 hover:to-blue-700 
+            text-white shadow-lg hover:shadow-xl 
+            transition-all duration-300 px-8 py-6 rounded-full">
+          <motion.span
+            animate={{
+              scale: isAnalyzing ? 1 : [1, 1.05, 1],
+            }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+            className="flex items-center gap-2 text-lg font-medium">
+            {isAnalyzing ? (
+              <>
+                <Loader2 className="h-5 w-5 animate-spin" />
+                Analyzing...
+              </>
+            ) : (
+              <>
+                <Sparkles className="h-5 w-5" />
+                Start AI Analysis
+              </>
+            )}
+          </motion.span>
+        </Button>
+      </form>
+      {!isAnalyzing && <ParticleEffects />}
+    </motion.div>
+
+    <motion.p
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="mt-4 text-sm text-gray-500 dark:text-gray-400">
+      {isAnalyzing
+        ? "This may take a few moments..."
+        : "Click to start analyzing your resume with our advanced AI"}
+    </motion.p>
+  </motion.div>
+);
+
+export default HomePage;

@@ -100,3 +100,17 @@ export type TestimonialType = {
   image: string;
   review: string;
 };
+
+// 类型定义
+interface Feature {
+  icon: React.ElementType;
+  title: string;
+  description: string;
+}
+
+interface UploadedFile {
+  url: string;
+  name: string;
+  contentType: string;
+  content: string;
+}

@@ -108,14 +108,6 @@ export default function Resumebar({
   };
   return (
     <div>
-      {messages.length === 0 && (
-        <div className="flex items-center justify-center">
-          {!attachments?.length && !uploadQueue?.length && (
-            <FileUploader onFilesPick={handleFilesPick} />
-          )}
-          {uploadQueue.length > 0 && <Loading />}
-        </div>
-      )}
       <div className="p-4 pb-7 flex justify-between w-full items-center gap-2">
         <AnimatePresence initial={false}>
           <div className="w-full items-center flex relative gap-2">
@@ -148,7 +140,7 @@ export default function Resumebar({
                         variant="ghost"
                         size="icon"
                         type="submit"
-                        disabled={isLoading || !input.trim()}>
+                        disabled={isLoading || !input?.trim()}>
                         <SendHorizonal className="w-5 h-5 " />
                       </Button>
                     </div>

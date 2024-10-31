@@ -1,15 +1,13 @@
 import React from "react";
-import ChatTopbar from "./chat-topbar";
-import ChatList from "./chat-list";
-import ChatBottombar from "./chat-bottombar";
 import { Message, useChat } from "ai/react";
+import ChatList from "./chat-list";
 import { ChatRequestOptions } from "ai";
 import { v4 as uuidv4 } from "uuid";
 import ResumeBar from "../resume/resume-bar";
 
 export interface ChatProps {
   chatId?: string;
-  setSelectedModel: React.Dispatch<React.SetStateAction<string>>;
+  setSelectedModel?: React.Dispatch<React.SetStateAction<string>>;
   messages: Message[];
   input: string;
   handleInputChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
@@ -79,7 +77,7 @@ export default function Chat({
 
       {/* <ResumeBar
         addToolResult={addToolResult}
-        setSelectedModel={setSelectedModel}
+        // setSelectedModel={setSelectedModel}
         messages={messages}
         input={input}
         handleInputChange={handleInputChange}

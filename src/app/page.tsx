@@ -8,30 +8,20 @@ import {
   MessageSquare,
 } from "lucide-react";
 import Link from "next/link";
+import HeroBanner from "@/components/home/HeroBanner";
+import LandingPage from "@/components/home/LandingPage";
+// import FeatureSection from "@/components/home/FeatureSection";
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen">
+    <main>
+      <LandingPage />
+
       {/* Hero Banner */}
-      <section className="relative bg-gradient-to-r from-primary/10 to-primary/5 py-20">
-        <div className="container px-4 md:px-6">
-          <div className="flex flex-col items-center space-y-4 text-center">
-            <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
-              AI-Powered Resume Insights
-            </h1>
-            <p className="max-w-[600px] text-gray-500 md:text-xl/relaxed">
-              Enhance your career journey with intelligent resume analysis and
-              personalized recommendations
-            </p>
-            <Button size="lg" className="mt-6">
-              Get Started <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      </section>
+      {/* <HeroBanner /> */}
 
       {/* Core Features */}
-      <section className="py-16">
+      {/* <section className="py-16">
         <div className="container px-4 md:px-6">
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
             {features.map((feature) => (
@@ -54,10 +44,10 @@ export default function HomePage() {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Trends Section */}
-      <section className="bg-gray-50 py-16">
+      {/* <section className="bg-gray-50 py-16">
         <div className="container px-4 md:px-6">
           <h2 className="mb-8 text-center text-3xl font-bold">
             Industry Insights
@@ -76,7 +66,8 @@ export default function HomePage() {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
+      {/* <FeatureSection /> */}
     </main>
   );
 }
