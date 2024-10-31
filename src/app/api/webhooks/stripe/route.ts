@@ -40,7 +40,7 @@ export async function POST(req: Request) {
     await sql`
   UPDATE users 
   SET 
-    stripe_subscription_id = ${String(subscription.id)},
+    stripe_subscription_id   = ${String(subscription.id)},
     stripe_customer_id = ${String(subscription.customer)},
     stripe_price_id = ${String(subscription.items.data[0].price.id)},
     stripe_current_period_end = to_timestamp(${subscription.current_period_end})
