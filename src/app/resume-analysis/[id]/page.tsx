@@ -4,6 +4,7 @@ import { useRouter } from "next/router";
 import { ResumeAnalysisPanel } from "@/components/resume/ResumeAnalysisPanel";
 import { useEffect, useState } from "react";
 import { ResumeAnalysis } from "@/types";
+import OptimizationPage from "@/components/resume/OptimizationPage";
 
 const AnalysisPage = ({ params }: { params: { id: string } }) => {
   const { id } = params;
@@ -48,7 +49,7 @@ const AnalysisPage = ({ params }: { params: { id: string } }) => {
     );
   }
 
-  return <ResumeAnalysisPanel analysis={analysis} />;
+  return <OptimizationPage analysisData={analysis} />;
 };
 
 export default AnalysisPage;

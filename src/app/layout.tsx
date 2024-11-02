@@ -6,7 +6,7 @@ import { Toaster } from "@/components/ui/sonner";
 import SessionWrapper from "@/components/session-wrapper";
 import Header from "@/components/home/Header";
 import { AI } from "./ai";
-
+import { TooltipProvider } from "@/components/ui/tooltip";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -63,9 +63,11 @@ export default function RootLayout({
         <body className={inter.className}>
           <ThemeProvider attribute="class">
             <AI>
-              <Header />
-              {children}
-              <Toaster />
+              <TooltipProvider>
+                <Header />
+                {children}
+                <Toaster />
+              </TooltipProvider>
             </AI>
           </ThemeProvider>
         </body>
