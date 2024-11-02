@@ -109,6 +109,12 @@ export const HomePage = () => {
         method: "POST",
         body: formData,
       });
+      console.log("response", response);
+      if (response.status === 401) {
+        toast.error("Please login first");
+        router.push(`/signin?callbackUrl=${window.location.href}`);
+        return;
+      }
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -146,9 +152,6 @@ export const HomePage = () => {
         uploadedFile: validAttachments[0],
         uploadProgress: 100,
       }));
-
-      // 上传成功提示
-      toast.success("File uploaded successfully!");
     } catch (error) {
       console.error("Upload error:", error);
       toast.error("Upload failed. Please try again.");
@@ -175,8 +178,7 @@ export const HomePage = () => {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="min-h-screen bg-gradient-to-b from-gray-50/50 via-white to-white 
-                 dark:from-gray-900/50 dark:via-gray-900 dark:to-gray-900
+      className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-950 dark:to-blue-950 
                  transition-colors duration-500">
       <div className="container mx-auto px-4 py-12">
         <motion.div

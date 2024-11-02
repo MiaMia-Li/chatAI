@@ -1,7 +1,54 @@
-import { FEATURES } from "@/config/page";
+// import { FEATURES } from "@/config/page";
 import { Feature } from "@/types";
 import { motion } from "framer-motion";
 import { Brain } from "lucide-react";
+import {
+  RiAtLine,
+  RiFileTextLine,
+  RiQuestionAnswerLine,
+  RiRobot2Line,
+} from "react-icons/ri";
+
+// export const FEATURES: Feature[] = [
+//   {
+//     icon: FileSearch,
+//     title: "Smart Analysis",
+//     description: "Advanced AI algorithms analyze your resume content",
+//   },
+//   {
+//     icon: ChartLine,
+//     title: "Detailed Insights",
+//     description: "Get comprehensive feedback on your professional profile",
+//   },
+//   {
+//     icon: Sparkles,
+//     title: "Recommendations",
+//     description: "Receive personalized suggestions for improvement",
+//   },
+// ];
+
+const features = [
+  {
+    icon: <RiAtLine className="w-6 h-6" />,
+    title: "Smart Analysis",
+    description: "Advanced AI algorithms analyze your resume content",
+  },
+  {
+    icon: <RiFileTextLine className="w-6 h-6" />,
+    title: "Detailed Insights",
+    description: "Get comprehensive feedback on your professional profile",
+  },
+  {
+    icon: <RiQuestionAnswerLine className="w-6 h-6" />,
+    title: "Recommendations",
+    description: "Receive personalized suggestions for improvement",
+  },
+  // {
+  //   icon: <RiRobot2Line className="w-6 h-6" />,
+  //   title: "AI Interview Coach",
+  //   description: "Simulate real interview scenarios with instant feedback",
+  // },
+];
 
 const PageHeader = () => (
   <motion.div
@@ -44,7 +91,7 @@ const FeatureGrid = () => (
     animate={{ opacity: 1, y: 0 }}
     transition={{ delay: 0.2 }}
     className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-12">
-    {FEATURES.map((feature, index) => (
+    {features.map((feature, index) => (
       <FeatureCard key={index} feature={feature} index={index} />
     ))}
   </motion.div>
@@ -68,8 +115,10 @@ const FeatureCard: React.FC<FeatureCardProps> = ({ feature, index }) => (
     transition={{ delay: 0.3 + index * 0.1 }}
     className="relative group">
     <div className="p-6 rounded-xl bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl transition-all duration-300">
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-purple-50/50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity" />
-      <feature.icon className="h-8 w-8 text-blue-500 mb-4" />
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-purple-50/50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-xl opacity-0 group-hover:opacity-60 transition-opacity" />
+      <div className="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center text-blue-600 dark:text-blue-400 mb-4">
+        {feature.icon}
+      </div>
       <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
         {feature.title}
       </h3>
