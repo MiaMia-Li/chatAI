@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
-import FileUploader from "./file-upload";
+import FileUploader from "./FileUploader";
 import { Button } from "../ui/button";
 import { Sparkles, ArrowRight, FileCheck } from "lucide-react";
 

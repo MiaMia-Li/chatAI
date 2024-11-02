@@ -21,7 +21,7 @@ import Image from "next/image";
 import MultiFilePicker from "../file-embedder";
 import { toast } from "sonner";
 import PreviewAttachment from "../preview-attachment";
-import FileUploader from "../resume/file-upload";
+import FileUploader from "../resume/FileUploader";
 
 export default function ChatBottombar({
   messages,

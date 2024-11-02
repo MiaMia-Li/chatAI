@@ -207,31 +207,31 @@ export default function ChatList({
                             </div>
                           );
                         }
-                        if (toolInvocation.toolName === "askForConfirmation") {
-                          return (
-                            <div key={toolCallId}>
-                              {toolInvocation.args.message}
-                              <div>
-                                {"result" in toolInvocation ? (
-                                  <b>{toolInvocation.result}</b>
-                                ) : (
-                                  <>
-                                    <Button
-                                      onClick={() => addResult("Yes")}
-                                      variant="outline">
-                                      Yes
-                                    </Button>
-                                    <Button
-                                      onClick={() => addResult("No")}
-                                      variant="outline">
-                                      No
-                                    </Button>
-                                  </>
-                                )}
-                              </div>
-                            </div>
-                          );
-                        }
+                        // if (toolInvocation.toolName === "askForConfirmation") {
+                        //   return (
+                        //     <div key={toolCallId}>
+                        //       {toolInvocation.args.message}
+                        //       <div>
+                        //         {"result" in toolInvocation ? (
+                        //           <b>{toolInvocation.result}</b>
+                        //         ) : (
+                        //           <>
+                        //             <Button
+                        //               onClick={() => addResult("Yes")}
+                        //               variant="outline">
+                        //               Yes
+                        //             </Button>
+                        //             <Button
+                        //               onClick={() => addResult("No")}
+                        //               variant="outline">
+                        //               No
+                        //             </Button>
+                        //           </>
+                        //         )}
+                        //       </div>
+                        //     </div>
+                        //   );
+                        // }
                         return null;
                       }
                     )}

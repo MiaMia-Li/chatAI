@@ -3,6 +3,8 @@ import { ChartLine, FileSearch } from "lucide-react";
 
 import { Sparkles } from "lucide-react";
 
+export const RESUME_ANALYSIS_PATH = "/resume-analysis";
+
 export const features = [
   {
     title: "Smart Resume Analysis",

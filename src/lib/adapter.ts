@@ -250,6 +250,37 @@ export default function vercelPostgresAdapter(): Adapter {
       };
     };
 
+    //insert analysis into database
+    const saveAnalysis = async (analysis: {
+      userId: string;
+      content: string;
+      fileName: string;
+      chatId: string;
+    }) => {
+      const { rows } = await sql`
+    INSERT INTO analysis (
+      user_id,
+      content,
+      file,
+      chat_id
+    ) 
+    VALUES (
+      ${analysis.userId},
+      ${JSON.stringify(analysis.content)},
+        ${analysis.fileName || null},
+      ${analysis.chatId}
+    )
+    RETURNING id, user_id, content, file, chat_id, created_at, updated_at`;
+
+      return rows[0];
+    };
+
+    const getAnalysis = async (chatId: string) => {
+      const { rows } =
+        await sql`SELECT * FROM analysis WHERE chat_id = ${chatId}`;
+      return rows[0];
+    };
+
     return {
       createUser,
       getUser,
@@ -265,6 +296,8 @@ export default function vercelPostgresAdapter(): Adapter {
       useVerificationToken,
       linkAccount,
       unlinkAccount,
+      saveAnalysis,
+      getAnalysis,
     };
   } catch (error) {
     throw error;

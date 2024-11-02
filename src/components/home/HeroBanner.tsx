@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Button, buttonVariants } from "../ui/button";
 import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { RESUME_ANALYSIS_PATH } from "@/config/page";
 
 const HeroBanner = () => {
   return (
@@ -21,7 +22,7 @@ const HeroBanner = () => {
           </p>
 
           <Link
-            href="/resume-optimization"
+            href={RESUME_ANALYSIS_PATH}
             className={cn(
               buttonVariants({
                 variant: "default",

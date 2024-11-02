@@ -114,3 +114,45 @@ interface UploadedFile {
   contentType: string;
   content: string;
 }
+
+export type ResumeAnalysis = z.infer<typeof resumeAnalysisSchema>;
+
+export const resumeAnalysisSchema = z.object({
+  totalScore: z.number().min(0).max(100),
+  scoreCategories: z.array(
+    z.object({
+      name: z.string(),
+      score: z.number().min(0).max(100),
+    })
+  ),
+  sections: z.array(
+    z.object({
+      id: z.string(),
+      name: z.string(),
+      suggestions: z.array(
+        z.object({
+          title: z.string(),
+          description: z.string(),
+          priority: z.enum(["high", "medium", "low"]),
+        })
+      ),
+    })
+  ),
+  basicInfo: z.object({
+    name: z.string(),
+    email: z.string(),
+    phone: z.string(),
+    education: z.string(),
+    summary: z.string().optional(),
+  }),
+  workExperience: z.array(
+    z.object({
+      company: z.string(),
+      position: z.string(),
+      period: z.string(),
+      description: z.string(),
+      achievements: z.array(z.string()).optional(),
+    })
+  ),
+  skills: z.array(z.string()),
+});

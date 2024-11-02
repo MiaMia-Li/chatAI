@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { ArrowRight, CheckCircle } from "lucide-react";
-import { features } from "@/config/page";
+import { features, RESUME_ANALYSIS_PATH } from "@/config/page";
 import Link from "next/link";
 
 export default function LandingPage() {
@@ -24,7 +24,7 @@ export default function LandingPage() {
               personalized optimization all in one place.
             </p>
             <div className="flex justify-center gap-4">
-              <Link href="/resume-optimization">
+              <Link href={RESUME_ANALYSIS_PATH}>
                 <Button
                   size="lg"
                   className="rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 dark:from-blue-500 dark:to-indigo-500">
@@ -81,7 +81,7 @@ export default function LandingPage() {
                   </p>
 
                   <Link
-                    href="/resume-optimization"
+                    href={RESUME_ANALYSIS_PATH}
                     className="mt-4 flex items-center text-blue-600 opacity-0 transition-opacity duration-300 group-hover:opacity-100 dark:text-blue-400">
                     <span className="text-sm font-medium">Learn more</span>
                     <ArrowRight className="ml-2 h-4 w-4" />
@@ -105,7 +105,7 @@ export default function LandingPage() {
               job search success with our AI-powered platform.
             </p>
             <div className="mt-10 flex items-center justify-center gap-x-6">
-              <Link href="/resume-optimization">
+              <Link href={RESUME_ANALYSIS_PATH}>
                 <Button
                   size="lg"
                   className="rounded-full bg-white text-blue-600 hover:bg-blue-50 dark:bg-white/90 dark:text-blue-600 dark:hover:bg-white">

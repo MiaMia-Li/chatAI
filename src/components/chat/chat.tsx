@@ -9,7 +9,7 @@ import ResumeBar from "../resume/resume-bar";
 
 export interface ChatProps {
   chatId?: string;
-  setSelectedModel: React.Dispatch<React.SetStateAction<string>>;
+  setSelectedModel?: React.Dispatch<React.SetStateAction<string>>;
   messages: Message[];
   input: string;
   handleInputChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;

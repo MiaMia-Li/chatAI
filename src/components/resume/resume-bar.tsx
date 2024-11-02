@@ -5,7 +5,7 @@ import { ChatProps } from "../chat/chat";
 import useChatStore from "@/app/hooks/useChatStore";
 import { toast } from "sonner";
 import PreviewAttachment from "../preview-attachment";
-import FileUploader from "./file-upload";
+import FileUploader from "./FileUploader";
 import { Button } from "../ui/button";
 import TextareaAutosize from "react-textarea-autosize";
 import { SendHorizonal } from "lucide-react";
